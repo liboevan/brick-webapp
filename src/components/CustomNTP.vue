@@ -1,209 +1,289 @@
 <template>
-  <div class="custom-ntp landscape">
-    <div class="ntp-header compact">
-      <h1 class="ntp-title">NTP Time Synchronization</h1>
-      <div class="auto-refresh">
-        <label class="refresh-toggle">
-          <input type="checkbox" v-model="autoRefresh" @change="toggleAutoRefresh">
-          <span class="toggle-slider"></span>
-          Auto Refresh ({{ autoRefresh ? 'ON' : 'OFF' }})
-        </label>
-        <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
+  <div class="custom-ntp">
+    <!-- Unified Header Bar -->
+    <header class="ntp-header">
+      <div class="header-left">
+        <button @click="goToMain" class="brick-logo-btn" title="Back to Main Page">
+          <div class="brick-logo">
+            <span class="brick-icon">🧱</span>
+            <span class="brick-text">BRICK</span>
+          </div>
+        </button>
+        <h1 class="ntp-title">NTP Time Synchronization</h1>
       </div>
-    </div>
+      <div class="header-right">
+        <div class="auto-refresh">
+          <label class="refresh-toggle">
+            <input type="checkbox" v-model="autoRefresh" @change="toggleAutoRefresh">
+            <span class="toggle-slider"></span>
+            Auto Refresh
+          </label>
+          <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
+        </div>
+        <div class="version-info">
+          <div class="version-btn" title="Version Information" @mouseenter="showVersionTooltip = true" @mouseleave="showVersionTooltip = false">
+            <span class="version-icon">❓</span>
+          </div>
+          <div v-if="showVersionTooltip" class="version-tooltip">
+            <div class="tooltip-content">
+              <div class="tooltip-title">
+                <span class="tooltip-icon">ℹ️</span>
+                Version Information
+              </div>
+              <div class="tooltip-item">
+                <span class="tooltip-label">Version:</span>
+                <span class="tooltip-value version-number">v{{ versionInfo.version }}</span>
+              </div>
+              <div class="tooltip-item">
+                <span class="tooltip-label">Build Date:</span>
+                <span class="tooltip-value">{{ formatBuildDate(versionInfo.buildDate) }}</span>
+              </div>
+              <div class="tooltip-item">
+                <span class="tooltip-label">Environment:</span>
+                <span class="tooltip-value environment-tag">{{ versionInfo.environment }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
+    <!-- Main Content - 2x3 Grid Layout -->
     <div class="ntp-content">
-      <!-- Left Column: Status and Tracking -->
-      <div class="left-column">
-        <!-- Status Overview -->
-        <div class="ntp-section compact">
-          <h2 class="section-title">Status Overview</h2>
-          <div class="status-overview">
-            <div class="status-item primary">
-              <span class="status-icon">⏰</span>
-              <div class="status-content">
-                <span class="status-label">Sync Status</span>
-                <span class="status-value" :class="getSyncStatusClass()">{{ getSyncStatusText() }}</span>
-              </div>
-            </div>
-            <div class="status-item">
-              <span class="status-icon">📍</span>
-              <div class="status-content">
-                <span class="status-label">Stratum</span>
-                <span class="status-value">{{ status.tracking?.Stratum || 'Unknown' }}</span>
-              </div>
-            </div>
-            <div class="status-item">
-              <span class="status-icon">📡</span>
-              <div class="status-content">
-                <span class="status-label">Sources</span>
-                <span class="status-value">{{ getActiveSourcesCount() }}</span>
-              </div>
-            </div>
-            <div class="status-item">
-              <span class="status-icon">⚡</span>
-              <div class="status-content">
-                <span class="status-label">Frequency</span>
-                <span class="status-value">{{ status.tracking.Frequency || 'Unknown' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tracking Details -->
-        <div class="ntp-section compact" v-if="status.tracking">
-          <h2 class="section-title">Tracking Details</h2>
-          <div class="tracking-grid compact">
-            <div class="tracking-item">
-              <span class="tracking-label">Last Offset:</span>
-              <span class="tracking-value">{{ status.tracking['Last offset'] || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">RMS Offset:</span>
-              <span class="tracking-value">{{ status.tracking['RMS offset'] || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">System Time:</span>
-              <span class="tracking-value">{{ status.tracking['System time'] || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">Update Interval:</span>
-              <span class="tracking-value">{{ status.tracking['Update interval'] || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">Root Delay:</span>
-              <span class="tracking-value">{{ status.tracking['Root delay'] || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">Root Dispersion:</span>
-              <span class="tracking-value">{{ status.tracking['Root dispersion'] || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">Skew:</span>
-              <span class="tracking-value">{{ status.tracking.Skew || 'Unknown' }}</span>
-            </div>
-            <div class="tracking-item">
-              <span class="tracking-label">Leap Status:</span>
-              <span class="tracking-value" :class="getLeapStatusClass()">{{ status.tracking['Leap status'] || 'Unknown' }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Activity Statistics -->
-        <div class="ntp-section compact" v-if="status.activity">
-          <h2 class="section-title">Activity Statistics</h2>
-          <div class="activity-stats">
-            <div class="stat-item">
-              <span class="stat-icon">✅</span>
-              <span class="stat-label">Success</span>
-              <span class="stat-value">{{ status.activity.ok_count || '0' }}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-icon">❌</span>
-              <span class="stat-label">Failed</span>
-              <span class="stat-value">{{ status.activity.failed_count || '0' }}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-icon">⚠️</span>
-              <span class="stat-label">Bogus</span>
-              <span class="stat-value">{{ status.activity.bogus_count || '0' }}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-icon">⏱️</span>
-              <span class="stat-label">Timeouts</span>
-              <span class="stat-value">{{ status.activity.timeout_count || '0' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column: Sources and Management -->
-      <div class="right-column">
-        <!-- NTP Sources -->
-        <div class="ntp-section compact">
-          <h2 class="section-title">NTP Sources</h2>
-          <div class="sources-container compact">
-            <div v-if="status.sources && status.sources.length > 0" class="sources-list">
-              <div v-for="(source, index) in status.sources" :key="index" class="source-item" :class="getSourceStatusClass(source)">
-                <div class="source-info">
-                  <span class="source-name">{{ source.name }}</span>
-                  <span class="source-status" :class="getSourceStatusClass(source)">{{ getSourceStatusText(source) }}</span>
+      <!-- Grid Container -->
+      <div class="grid-container">
+        <!-- Area 1: Status Overview -->
+        <div class="grid-area area-1">
+          <div class="panel-section status-overview">
+            <h2 class="section-title">Status Overview</h2>
+            <div class="status-grid">
+              <div class="status-card primary" :class="getSyncStatusClass()">
+                <div class="status-icon">⏰</div>
+                <div class="status-info">
+                  <div class="status-label">Sync Status</div>
+                  <div class="status-value">{{ getSyncStatusText() }}</div>
                 </div>
-                <div class="source-details">
-                  <span class="detail">Stratum: {{ source.stratum || 'N/A' }}</span>
-                  <span class="detail">Poll: {{ source.poll || 'N/A' }}</span>
-                  <span class="detail">Reach: {{ source.reach || 'N/A' }}</span>
-                  <span class="detail">Offset: {{ source.offset || 'N/A' }}</span>
+              </div>
+              <div class="status-card">
+                <div class="status-icon">📍</div>
+                <div class="status-info">
+                  <div class="status-label">Stratum</div>
+                  <div class="status-value">{{ status.tracking?.Stratum || 'Unknown' }}</div>
+                </div>
+              </div>
+              <div class="status-card">
+                <div class="status-icon">📡</div>
+                <div class="status-info">
+                  <div class="status-label">Active Sources</div>
+                  <div class="status-value">{{ getActiveSourcesCount() }}</div>
+                </div>
+              </div>
+              <div class="status-card">
+                <div class="status-icon">⚡</div>
+                <div class="status-info">
+                  <div class="status-label">Frequency</div>
+                  <div class="status-value">{{ status.tracking?.Frequency || 'Unknown' }}</div>
                 </div>
               </div>
             </div>
-            <div v-else class="no-sources">
-              <p>No NTP sources configured</p>
+          </div>
+        </div>
+
+        <!-- Area 2: Activity Statistics -->
+        <div class="grid-area area-2">
+          <div class="panel-section activity-section">
+            <h2 class="section-title">Activity Statistics</h2>
+            <div class="activity-grid">
+              <div class="activity-card success">
+                <div class="activity-icon">✅</div>
+                <div class="activity-info">
+                  <div class="activity-label">Success</div>
+                  <div class="activity-value">{{ status.activity?.ok_count || '0' }}</div>
+                </div>
+              </div>
+              <div class="activity-card error">
+                <div class="activity-icon">❌</div>
+                <div class="activity-info">
+                  <div class="activity-label">Failed</div>
+                  <div class="activity-value">{{ status.activity?.failed_count || '0' }}</div>
+                </div>
+              </div>
+              <div class="activity-card warning">
+                <div class="activity-icon">⚠️</div>
+                <div class="activity-info">
+                  <div class="activity-label">Bogus</div>
+                  <div class="activity-value">{{ status.activity?.bogus_count || '0' }}</div>
+                </div>
+              </div>
+              <div class="activity-card timeout">
+                <div class="activity-icon">⏱️</div>
+                <div class="activity-info">
+                  <div class="activity-label">Timeouts</div>
+                  <div class="activity-value">{{ status.activity?.timeout_count || '0' }}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Server Management -->
-        <div class="ntp-section compact">
-          <h2 class="section-title">Server Management</h2>
-          
-          <!-- Current Servers -->
-          <div class="servers-section">
-            <h3>Current NTP Servers</h3>
-            <div v-if="servers.length > 0" class="servers-list compact">
-              <div v-for="(server, index) in servers" :key="index" class="server-item">
-                <span class="server-name">{{ server.name }}</span>
-                <span class="server-status" :class="getServerStatusClass(server)">{{ getServerStatus(server) }}</span>
+        <!-- Area 3: NTP Sources -->
+        <div class="grid-area area-3">
+          <div class="panel-section sources-section">
+            <h2 class="section-title">NTP Sources</h2>
+            <div class="sources-container">
+              <div v-if="status.sources && status.sources.length > 0" class="sources-list">
+                <div v-for="(source, index) in status.sources" :key="index" class="source-item" :class="getSourceStatusClass(source)">
+                  <div class="source-header">
+                    <span class="source-name">{{ source.name }}</span>
+                    <span class="source-status" :class="getSourceStatusClass(source)">{{ getSourceStatusText(source) }}</span>
+                  </div>
+                  <div class="source-details">
+                    <div class="detail-row">
+                      <span class="detail-label">Stratum:</span>
+                      <span class="detail-value">{{ source.stratum || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Poll:</span>
+                      <span class="detail-value">{{ source.poll || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Reach:</span>
+                      <span class="detail-value">{{ source.reach || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Offset:</span>
+                      <span class="detail-value">{{ source.offset || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="no-sources">
+                <p>No NTP sources configured</p>
               </div>
             </div>
-            <div v-else class="no-servers">
-              <p>No NTP servers configured</p>
+          </div>
+        </div>
+
+        <!-- Area 4: Tracking Details (Complete) -->
+        <div class="grid-area area-4">
+          <div class="panel-section tracking-details">
+            <h2 class="section-title">Tracking Details</h2>
+            <div class="tracking-grid">
+              <div class="tracking-item">
+                <span class="tracking-label">Last Offset:</span>
+                <span class="tracking-value">{{ status.tracking['Last offset'] || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">RMS Offset:</span>
+                <span class="tracking-value">{{ status.tracking['RMS offset'] || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">System Time:</span>
+                <span class="tracking-value">{{ status.tracking['System time'] || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">Update Interval:</span>
+                <span class="tracking-value">{{ status.tracking['Update interval'] || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">Root Delay:</span>
+                <span class="tracking-value">{{ status.tracking['Root delay'] || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">Root Dispersion:</span>
+                <span class="tracking-value">{{ status.tracking['Root dispersion'] || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">Skew:</span>
+                <span class="tracking-value">{{ status.tracking?.Skew || 'Unknown' }}</span>
+              </div>
+              <div class="tracking-item">
+                <span class="tracking-label">Leap Status:</span>
+                <span class="tracking-value" :class="getLeapStatusClass()">{{ status.tracking['Leap status'] || 'Unknown' }}</span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Add New Servers -->
-          <div class="servers-section">
-            <h3>Configure NTP Servers</h3>
-            <div class="add-servers-form compact">
-              <div class="form-group">
+        <!-- Area 5: Future Feature Space -->
+        <div class="grid-area area-5">
+          <div class="panel-section future-section">
+            <h2 class="section-title">Future Features</h2>
+            <div class="future-content">
+              <div class="future-icon">🚀</div>
+              <div class="future-text">
+                <h3>Coming Soon</h3>
+                <p>This space is reserved for future NTP features and enhancements.</p>
+                <ul class="future-features">
+                  <li>Advanced time synchronization metrics</li>
+                  <li>Historical performance data</li>
+                  <li>Custom alert configurations</li>
+                  <li>Network topology visualization</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Area 6: Server Management -->
+        <div class="grid-area area-6">
+          <div class="panel-section management-section">
+            <h2 class="section-title">Server Management</h2>
+            
+            <!-- Current Servers -->
+            <div class="servers-section">
+              <h3 class="subsection-title">Current NTP Servers</h3>
+              <div v-if="servers.length > 0" class="servers-list">
+                <div v-for="(server, index) in servers" :key="index" class="server-item">
+                  <span class="server-name">{{ server.name }}</span>
+                  <span class="server-status" :class="getServerStatusClass(server)">{{ getServerStatus(server) }}</span>
+                </div>
+              </div>
+              <div v-else class="no-servers">
+                <p>No NTP servers configured</p>
+              </div>
+            </div>
+
+            <!-- Add New Servers -->
+            <div class="servers-section">
+              <h3 class="subsection-title">Configure NTP Servers</h3>
+              <div class="add-servers-form">
                 <textarea 
                   v-model="newServers"
                   placeholder="pool.ntp.org&#10;time.google.com&#10;time.windows.com"
-                  rows="2"
-                  class="form-textarea compact"
+                  rows="3"
+                  class="form-textarea"
                 ></textarea>
-              </div>
-              <div class="form-actions compact">
-                <button 
-                  @click="addServers" 
-                  :disabled="loading.servers || !newServers.trim()"
-                  class="action-btn primary compact"
-                >
-                  <span v-if="loading.servers" class="loading-spinner">⏳</span>
-                  <span v-else>Add Servers</span>
-                </button>
-                <button 
-                  @click="setDefaultServers" 
-                  :disabled="loading.servers"
-                  class="action-btn secondary compact"
-                >
-                  <span v-if="loading.servers" class="loading-spinner">⏳</span>
-                  <span v-else>Set Default</span>
-                </button>
-                <button 
-                  @click="clearServers" 
-                  :disabled="loading.servers"
-                  class="action-btn danger compact"
-                >
-                  <span v-if="loading.servers" class="loading-spinner">⏳</span>
-                  <span v-else>Clear All</span>
-                </button>
+                <div class="form-actions">
+                  <button 
+                    @click="addServers" 
+                    :disabled="loading.servers || !newServers.trim()"
+                    class="action-btn primary"
+                  >
+                    <span v-if="loading.servers" class="loading-spinner">⏳</span>
+                    <span v-else>Add Servers</span>
+                  </button>
+                  <button 
+                    @click="setDefaultServers" 
+                    :disabled="loading.servers"
+                    class="action-btn secondary"
+                  >
+                    <span v-if="loading.servers" class="loading-spinner">⏳</span>
+                    <span v-else>Set Default</span>
+                  </button>
+                  <button 
+                    @click="clearServers" 
+                    :disabled="loading.servers"
+                    class="action-btn danger"
+                  >
+                    <span v-if="loading.servers" class="loading-spinner">⏳</span>
+                    <span v-else>Clear All</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
 
@@ -247,19 +327,73 @@ export default {
       apiConfig: null,
       autoRefresh: true,
       refreshInterval: null,
-      lastUpdateTime: 'Never'
+      lastUpdateTime: 'Never',
+      showVersionTooltip: false,
+      versionInfo: {
+        version: '0.1.0-dev',
+        buildDate: new Date().toISOString(),
+        environment: 'development'
+      }
     }
   },
   mounted() {
     this.apiConfig = getApiConfig()
     this.loadStatus()
     this.loadServers()
+    this.loadVersionInfo()
     this.startAutoRefresh()
+    
+    // Add click outside listener for version tooltip
+    document.addEventListener('click', this.handleClickOutside)
   },
   beforeUnmount() {
     this.stopAutoRefresh()
+    document.removeEventListener('click', this.handleClickOutside)
   },
   methods: {
+    goToMain() {
+      this.$router.push('/')
+    },
+
+    showVersionInfo() {
+      this.showVersionTooltip = !this.showVersionTooltip
+    },
+
+    formatBuildDate(dateString) {
+      if (!dateString) return 'Unknown'
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    },
+
+    handleClickOutside(event) {
+      const versionInfo = this.$el.querySelector('.version-info')
+      if (versionInfo && !versionInfo.contains(event.target)) {
+        this.showVersionTooltip = false
+      }
+    },
+
+    async loadVersionInfo() {
+      try {
+        const response = await fetch(`${this.apiConfig.clockApi}/version`)
+        if (response.ok) {
+          const data = await response.json()
+          this.versionInfo = {
+            version: data.version || '0.1.0-dev',
+            buildDate: data.build_datetime || new Date().toISOString(),
+            environment: 'production'
+          }
+        }
+      } catch (err) {
+        console.log('Failed to load version info, using defaults')
+      }
+    },
+
     async loadStatus() {
       this.loading.status = true
       try {
@@ -276,8 +410,6 @@ export default {
         this.loading.status = false
       }
     },
-
-
 
     async loadServers() {
       try {
@@ -422,8 +554,6 @@ export default {
       }
     },
 
-
-
     async addServers() {
       if (!this.newServers.trim()) return
       
@@ -503,63 +633,72 @@ export default {
 </script>
 
 <style scoped>
-.custom-ntp.landscape {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0.4rem;
+.custom-ntp {
   height: 100vh;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #2d4a2d 0%, #1e3a1e 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
 }
 
-.ntp-header.compact {
-  text-align: center;
-  margin-bottom: 0.4rem;
-  padding: 0.6rem;
-  background: rgba(139, 169, 139, 0.9);
-  border-radius: var(--border-radius);
+/* Header Styles */
+.ntp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .ntp-title {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #2c3e2c;
-  margin-bottom: 0.2rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  letter-spacing: 0.3px;
+  color: #2c3e50;
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
 .auto-refresh {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin-top: 0.2rem;
+  gap: 1rem;
 }
 
 .refresh-toggle {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  color: #2c3e2c;
-  font-size: 0.8rem;
+  gap: 0.5rem;
+  color: #34495e;
+  font-size: 0.85rem;
   cursor: pointer;
-  background: rgba(107, 142, 107, 0.2);
-  padding: 0.3rem 0.6rem;
-  border-radius: var(--border-radius);
-  border: 1px solid rgba(107, 142, 107, 0.4);
+  background: #f8f9fa;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  border: 1px solid #e9ecef;
   transition: all 0.3s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
 }
 
 .refresh-toggle:hover {
-  background: rgba(107, 142, 107, 0.3);
-  border-color: rgba(107, 142, 107, 0.6);
+  background: #e9ecef;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .refresh-toggle input[type="checkbox"] {
@@ -567,10 +706,10 @@ export default {
 }
 
 .toggle-slider {
-  width: 32px;
-  height: 16px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 8px;
+  width: 36px;
+  height: 18px;
+  background: #dee2e6;
+  border-radius: 9px;
   position: relative;
   transition: background 0.3s ease;
 }
@@ -578,8 +717,8 @@ export default {
 .toggle-slider:before {
   content: '';
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: white;
   border-radius: 50%;
   top: 3px;
@@ -588,235 +727,493 @@ export default {
 }
 
 .refresh-toggle input:checked + .toggle-slider {
-  background: #6b8e6b;
+  background: #4CAF50;
 }
 
 .refresh-toggle input:checked + .toggle-slider:before {
-  transform: translateX(16px);
+  transform: translateX(18px);
 }
 
 .last-update {
-  color: rgba(44, 62, 44, 0.8);
-  font-size: 0.75rem;
+  color: #6c757d;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
-.ntp-content {
-  display: flex;
-  gap: 0.8rem;
-  flex: 1;
-  overflow: hidden;
-  max-height: calc(100vh - 110px);
-}
-
-.left-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  overflow-y: auto;
-  max-height: 100%;
-}
-
-.right-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  overflow-y: auto;
-  max-height: 100%;
-}
-
-.ntp-section {
-  background: linear-gradient(135deg, rgba(139, 169, 139, 0.95) 0%, rgba(107, 142, 107, 0.95) 100%);
-  border-radius: var(--border-radius);
-  padding: 0.8rem;
-  margin-bottom: 0.4rem;
-  backdrop-filter: blur(10px);
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.ntp-section.compact {
-  padding: 0.6rem;
-  margin-bottom: 0.4rem;
-}
-
-.section-title {
-  color: #2c3e2c;
-  font-size: 1.1rem;
-  margin-bottom: 0.6rem;
-  text-align: center;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Status Overview */
-.status-overview {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.6rem;
-}
-
-.status-item {
-  background: rgba(107, 142, 107, 0.15);
-  border-radius: var(--border-radius);
-  padding: 0.6rem;
+.header-right {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
 }
 
-.status-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.version-info {
+  position: relative;
 }
 
-.status-item.primary {
-  background: rgba(107, 142, 107, 0.25);
-  box-shadow: 0 2px 6px rgba(107, 142, 107, 0.3);
+.version-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.status-icon {
-  font-size: 1.1rem;
-  flex-shrink: 0;
+.version-btn:hover {
+  background: rgba(76, 175, 80, 0.1);
+  transform: scale(1.05);
 }
 
-.status-content {
+.version-icon {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  transition: color 0.3s ease;
+}
+
+.version-btn:hover .version-icon {
+  color: #4CAF50;
+}
+
+.version-tooltip {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 1000;
+  min-width: 250px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-content {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.5rem;
 }
 
-.status-label {
-  color: rgba(44, 62, 44, 0.8);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-value {
-  color: #2c3e2c;
-  font-size: 0.9rem;
+.tooltip-title {
   font-weight: 700;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.status-value.synced {
-  color: #6b8e6b;
-  text-shadow: 0 0 4px rgba(107, 142, 107, 0.3);
-  font-weight: 800;
+.tooltip-icon {
+  font-size: 1rem;
 }
 
-.status-value.not-synced {
-  color: #d32f2f;
-  text-shadow: 0 0 4px rgba(211, 47, 47, 0.3);
-  font-weight: 800;
-}
-
-.status-value.warning {
-  color: #f57c00;
-  text-shadow: 0 0 4px rgba(245, 124, 0, 0.3);
-  font-weight: 800;
-}
-
-/* Tracking Grid */
-.tracking-grid.compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
-}
-
-.tracking-item {
-  background: rgba(107, 142, 107, 0.1);
-  border-radius: var(--border-radius);
-  padding: 0.4rem;
+.tooltip-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 1rem;
+}
+
+.tooltip-label {
+  color: #6c757d;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tooltip-value {
+  color: #2c3e50;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.version-number {
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.environment-tag {
+  color: #FF9800;
+  background: rgba(255, 152, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.brick-logo-btn {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.brick-logo-btn:hover {
+  background: rgba(76, 175, 80, 0.1);
+  transform: scale(1.05);
+  border: none;
+  outline: none;
+}
+
+.brick-logo-btn:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.brick-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  border: none;
+  outline: none;
+}
+
+.brick-icon {
+  font-size: 1.2rem;
+}
+
+.brick-text {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.brick-logo:hover,
+.brick-logo:focus {
+  border: none;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Main Content - 2x3 Grid Layout */
+.ntp-content {
+  display: flex;
+  flex: 1;
+  padding: 1rem 2rem;
+  overflow: hidden;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.area-1 {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.area-2 {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.area-3 {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.area-4 {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.area-5 {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.area-6 {
+  grid-area: 2 / 3 / 3 / 4;
+}
+
+.panel-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 700;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.subsection-title {
+  color: #495057;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+/* Status Overview */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  flex: 1;
+}
+
+.status-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.status-card.primary {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border: 2px solid #4CAF50;
+}
+
+.status-card.primary.synced {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border-color: #4CAF50;
+}
+
+.status-card.primary.not-synced {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-color: #f44336;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.status-label {
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-value {
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Tracking Details */
+.tracking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tracking-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
 }
 
 .tracking-label {
-  color: rgba(44, 62, 44, 0.8);
-  font-size: 0.7rem;
+  color: #6c757d;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .tracking-value {
-  color: #2c3e2c;
-  font-size: 0.7rem;
+  color: #2c3e50;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
-/* Sources Container */
-.sources-container.compact {
-  margin-top: 0.2rem;
+/* Future Features Section */
+.future-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 1rem;
+}
+
+.future-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.future-text h3 {
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.future-text p {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.future-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.future-features li {
+  color: #495057;
+  font-size: 0.75rem;
+  margin-bottom: 0.3rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.future-features li:before {
+  content: '•';
+  color: #4CAF50;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+/* Sources Section */
+.sources-container {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .sources-list {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.75rem;
 }
 
 .source-item {
-  background: rgba(107, 142, 107, 0.1);
-  border-radius: var(--border-radius);
-  padding: 0.4rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
 }
 
 .source-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .source-item.current {
-  background: rgba(107, 142, 107, 0.25);
-  box-shadow: 0 2px 6px rgba(107, 142, 107, 0.3);
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border-color: #4CAF50;
 }
 
 .source-item.selected {
-  background: rgba(33, 150, 243, 0.25);
-  box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-color: #2196F3;
 }
 
 .source-item.candidate {
-  background: rgba(255, 152, 0, 0.25);
-  box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-color: #FF9800;
 }
 
 .source-item.rejected {
-  background: rgba(244, 67, 54, 0.25);
-  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-color: #f44336;
 }
 
-.source-info {
+.source-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.75rem;
 }
 
 .source-name {
-  color: #2c3e2c;
+  color: #2c3e50;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .source-status {
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.55rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5px;
 }
 
 .source-status.current {
-  background: #6b8e6b;
+  background: #4CAF50;
   color: white;
 }
 
@@ -841,85 +1238,120 @@ export default {
 }
 
 .source-details {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-.detail {
-  color: rgba(44, 62, 44, 0.7);
-  font-size: 0.65rem;
-  font-weight: 500;
-}
-
-/* Activity Stats */
-.activity-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
-.stat-item {
-  background: rgba(107, 142, 107, 0.1);
-  border-radius: var(--border-radius);
-  padding: 0.4rem;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.stat-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.stat-icon {
-  font-size: 1.1rem;
-  display: block;
-  margin-bottom: 0.2rem;
-}
-
-.stat-label {
-  color: rgba(44, 62, 44, 0.8);
+.detail-label {
+  color: #6c757d;
   font-size: 0.65rem;
-  display: block;
-  margin-bottom: 0.15rem;
   font-weight: 600;
 }
 
-.stat-value {
-  color: #2c3e2c;
-  font-size: 0.9rem;
+.detail-value {
+  color: #2c3e50;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* Activity Statistics */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  flex: 1;
+}
+
+.activity-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.activity-card.success {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border-color: #4CAF50;
+}
+
+.activity-card.error {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-color: #f44336;
+}
+
+.activity-card.warning {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-color: #FF9800;
+}
+
+.activity-card.timeout {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border-color: #9C27B0;
+}
+
+.activity-icon {
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.activity-label {
+  color: #6c757d;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.activity-value {
+  color: #2c3e50;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 
 /* Server Management */
 .servers-section {
-  margin-bottom: 0.6rem;
+  margin-bottom: 1.5rem;
 }
 
-.servers-section h3 {
-  color: #2c3e2c;
-  font-size: 0.9rem;
-  margin-bottom: 0.4rem;
-  font-weight: 700;
-}
-
-.servers-list.compact {
+.servers-list {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .server-item {
-  background: rgba(107, 142, 107, 0.1);
-  border-radius: var(--border-radius);
-  padding: 0.4rem 0.6rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
 }
 
 .server-item:hover {
@@ -928,22 +1360,22 @@ export default {
 }
 
 .server-name {
-  color: #2c3e2c;
+  color: #2c3e50;
   font-weight: 600;
   font-size: 0.8rem;
 }
 
 .server-status {
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 15px;
   font-size: 0.55rem;
   font-weight: 700;
   text-transform: uppercase;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5px;
 }
 
 .server-status.current {
-  background: #6b8e6b;
+  background: #4CAF50;
   color: white;
 }
 
@@ -968,146 +1400,98 @@ export default {
 }
 
 /* Form Styles */
-.add-servers-form.compact {
+.add-servers-form {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 1rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.form-textarea.compact {
+.form-textarea {
   width: 100%;
-  padding: 0.4rem;
-  border-radius: var(--border-radius);
-  background: rgba(139, 169, 139, 0.8);
-  color: #2c3e2c;
-  font-family: monospace;
-  font-size: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #2c3e50;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
   resize: vertical;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
 }
 
-.form-textarea.compact:focus {
+.form-textarea:focus {
   outline: none;
-  background: rgba(139, 169, 139, 0.9);
-  box-shadow: 0 2px 8px rgba(107, 142, 107, 0.3);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
 }
 
-.form-textarea.compact::placeholder {
-  color: rgba(44, 62, 44, 0.6);
+.form-textarea::placeholder {
+  color: #adb5bd;
 }
 
-.form-actions.compact {
+.form-actions {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.action-btn.compact {
-  padding: 0.4rem 0.8rem;
+.action-btn {
+  padding: 0.6rem 1rem;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.4rem;
   font-size: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  flex: 1;
+  justify-content: center;
 }
 
-.action-btn.compact:disabled {
+.action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none !important;
 }
 
-.action-btn.compact.primary {
-  background: #6b8e6b;
+.action-btn.primary {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
   color: white;
 }
 
-.action-btn.compact.primary:hover:not(:disabled) {
-  background: #5a7a5a;
+.action-btn.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049, #388E3C);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(107, 142, 107, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
-.action-btn.compact.secondary {
-  background: rgba(107, 142, 107, 0.2);
-  color: #2c3e2c;
-}
-
-.action-btn.compact.secondary:hover:not(:disabled) {
-  background: rgba(107, 142, 107, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(107, 142, 107, 0.2);
-}
-
-.action-btn.compact.danger {
-  background: #d32f2f;
+.action-btn.secondary {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
   color: white;
 }
 
-.action-btn.compact.danger:hover:not(:disabled) {
-  background: #b71c1c;
+.action-btn.secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a6268, #495057);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
-
-
-/* Clients Container */
-.clients-container.compact {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+.action-btn.danger {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
 }
 
-.client-item {
-  background: rgba(107, 142, 107, 0.1);
-  border-radius: var(--border-radius);
-  padding: 0.4rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
-}
-
-.client-item:hover {
+.action-btn.danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.client-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.2rem;
-}
-
-.client-address {
-  color: #2c3e2c;
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-
-.client-packets {
-  color: rgba(44, 62, 44, 0.7);
-  font-size: 0.65rem;
-  font-weight: 500;
-}
-
-.client-details {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
 }
 
 /* Messages */
@@ -1116,41 +1500,42 @@ export default {
   position: fixed;
   top: 20px;
   right: 20px;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--border-radius);
-  max-width: 350px;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  max-width: 400px;
   z-index: 1000;
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   border: 2px solid;
+  backdrop-filter: blur(10px);
 }
 
 .error-message {
-  background: rgba(244, 67, 54, 0.9);
+  background: rgba(244, 67, 54, 0.95);
   color: #ffffff;
   border-color: #d32f2f;
 }
 
 .success-message {
-  background: rgba(76, 175, 80, 0.9);
+  background: rgba(76, 175, 80, 0.95);
   color: #ffffff;
   border-color: #4CAF50;
 }
 
 .error-message h3,
 .success-message h3 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 
 .error-message p,
 .success-message p {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
@@ -1158,12 +1543,13 @@ export default {
   background: none;
   border: none;
   color: inherit;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   padding: 0;
   margin-left: auto;
   opacity: 0.7;
   font-weight: bold;
+  transition: opacity 0.3s ease;
 }
 
 .close-btn:hover {
@@ -1179,22 +1565,66 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-
-
 .no-servers,
 .no-sources {
   text-align: center;
-  color: rgba(44, 62, 44, 0.6);
+  color: #6c757d;
   font-style: italic;
-  padding: 0.6rem;
-  font-size: 0.75rem;
+  padding: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
 }
 
-/* Responsive Design - Mobile */
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  
+  .area-1 {
+    grid-area: 1 / 1 / 2 / 2;
+  }
+  
+  .area-2 {
+    grid-area: 1 / 2 / 2 / 3;
+  }
+  
+  .area-3 {
+    grid-area: 2 / 1 / 3 / 2;
+  }
+  
+  .area-4 {
+    grid-area: 2 / 2 / 3 / 3;
+  }
+  
+  .area-5 {
+    grid-area: 3 / 1 / 4 / 2;
+  }
+  
+  .area-6 {
+    grid-area: 3 / 2 / 4 / 3;
+  }
+}
+
 @media (max-width: 768px) {
-  .custom-ntp.landscape {
-    padding: 0.25rem;
+  .ntp-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header-right {
+    flex-direction: column;
+    gap: 1rem;
   }
   
   .ntp-title {
@@ -1203,42 +1633,38 @@ export default {
   
   .auto-refresh {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
   }
   
   .ntp-content {
-    flex-direction: column;
-    gap: 0.75rem;
+    padding: 1rem;
   }
   
-  .left-column,
-  .right-column {
-    overflow-y: visible;
+  .grid-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(6, auto);
   }
   
-  .status-overview {
+  .area-1,
+  .area-2,
+  .area-3,
+  .area-4,
+  .area-5,
+  .area-6 {
+    grid-area: auto;
+  }
+  
+  .status-grid,
+  .activity-grid,
+  .tracking-grid {
     grid-template-columns: 1fr;
   }
   
-  .tracking-grid.compact {
-    grid-template-columns: 1fr;
-  }
-  
-  .activity-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .control-card.compact {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-  }
-  
-  .form-actions.compact {
+  .form-actions {
     flex-direction: column;
   }
   
-  .action-btn.compact {
+  .action-btn {
     justify-content: center;
   }
 }

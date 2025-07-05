@@ -1,18 +1,12 @@
 <template>
   <div id="app">
     <router-view />
-    <BuildInfo />
   </div>
 </template>
 
 <script>
-import BuildInfo from './components/BuildInfo.vue'
-
 export default {
-  name: 'App',
-  components: {
-    BuildInfo
-  }
+  name: 'App'
 }
 </script>
 
