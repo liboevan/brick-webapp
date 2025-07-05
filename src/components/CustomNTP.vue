@@ -20,31 +20,7 @@
           </label>
           <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
         </div>
-        <div class="version-info">
-          <div class="version-btn" title="Version Information" @mouseenter="showVersionTooltip = true" @mouseleave="showVersionTooltip = false">
-            <span class="version-icon">❓</span>
-          </div>
-          <div v-if="showVersionTooltip" class="version-tooltip">
-            <div class="tooltip-content">
-              <div class="tooltip-title">
-                <span class="tooltip-icon">ℹ️</span>
-                Version Information
-              </div>
-              <div class="tooltip-item">
-                <span class="tooltip-label">Version:</span>
-                <span class="tooltip-value version-number">v{{ versionInfo.version }}</span>
-              </div>
-              <div class="tooltip-item">
-                <span class="tooltip-label">Build Date:</span>
-                <span class="tooltip-value">{{ formatBuildDate(versionInfo.buildDate) }}</span>
-              </div>
-              <div class="tooltip-item">
-                <span class="tooltip-label">Environment:</span>
-                <span class="tooltip-value environment-tag">{{ versionInfo.environment }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </header>
 
@@ -89,83 +65,8 @@
           </div>
         </div>
 
-        <!-- Area 2: Activity Statistics -->
+        <!-- Area 2: Tracking Details -->
         <div class="grid-area area-2">
-          <div class="panel-section activity-section">
-            <h2 class="section-title">Activity Statistics</h2>
-            <div class="activity-grid">
-              <div class="activity-card success">
-                <div class="activity-icon">✅</div>
-                <div class="activity-info">
-                  <div class="activity-label">Success</div>
-                  <div class="activity-value">{{ status.activity?.ok_count || '0' }}</div>
-                </div>
-              </div>
-              <div class="activity-card error">
-                <div class="activity-icon">❌</div>
-                <div class="activity-info">
-                  <div class="activity-label">Failed</div>
-                  <div class="activity-value">{{ status.activity?.failed_count || '0' }}</div>
-                </div>
-              </div>
-              <div class="activity-card warning">
-                <div class="activity-icon">⚠️</div>
-                <div class="activity-info">
-                  <div class="activity-label">Bogus</div>
-                  <div class="activity-value">{{ status.activity?.bogus_count || '0' }}</div>
-                </div>
-              </div>
-              <div class="activity-card timeout">
-                <div class="activity-icon">⏱️</div>
-                <div class="activity-info">
-                  <div class="activity-label">Timeouts</div>
-                  <div class="activity-value">{{ status.activity?.timeout_count || '0' }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Area 3: NTP Sources -->
-        <div class="grid-area area-3">
-          <div class="panel-section sources-section">
-            <h2 class="section-title">NTP Sources</h2>
-            <div class="sources-container">
-              <div v-if="status.sources && status.sources.length > 0" class="sources-list">
-                <div v-for="(source, index) in status.sources" :key="index" class="source-item" :class="getSourceStatusClass(source)">
-                  <div class="source-header">
-                    <span class="source-name">{{ source.name }}</span>
-                    <span class="source-status" :class="getSourceStatusClass(source)">{{ getSourceStatusText(source) }}</span>
-                  </div>
-                  <div class="source-details">
-                    <div class="detail-row">
-                      <span class="detail-label">Stratum:</span>
-                      <span class="detail-value">{{ source.stratum || 'N/A' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Poll:</span>
-                      <span class="detail-value">{{ source.poll || 'N/A' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Reach:</span>
-                      <span class="detail-value">{{ source.reach || 'N/A' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Offset:</span>
-                      <span class="detail-value">{{ source.offset || 'N/A' }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="no-sources">
-                <p>No NTP sources configured</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Area 4: Tracking Details (Complete) -->
-        <div class="grid-area area-4">
           <div class="panel-section tracking-details">
             <h2 class="section-title">Tracking Details</h2>
             <div class="tracking-grid">
@@ -205,80 +106,166 @@
           </div>
         </div>
 
-        <!-- Area 5: Future Feature Space -->
-        <div class="grid-area area-5">
-          <div class="panel-section future-section">
-            <h2 class="section-title">Future Features</h2>
-            <div class="future-content">
-              <div class="future-icon">🚀</div>
-              <div class="future-text">
-                <h3>Coming Soon</h3>
-                <p>This space is reserved for future NTP features and enhancements.</p>
-                <ul class="future-features">
-                  <li>Advanced time synchronization metrics</li>
-                  <li>Historical performance data</li>
-                  <li>Custom alert configurations</li>
-                  <li>Network topology visualization</li>
-                </ul>
+        <!-- Area 3: NTP Sources -->
+        <div class="grid-area area-3">
+          <div class="panel-section sources-section">
+            <h2 class="section-title">NTP Sources</h2>
+            <div class="sources-container">
+              <div v-if="status.sources && status.sources.length > 0" class="sources-list">
+                <div v-for="(source, index) in status.sources" :key="index" class="source-item" :class="getSourceStatusClass(source)">
+                  <div class="source-header">
+                    <span class="source-name">{{ source.name }}</span>
+                    <span class="source-status" :class="getSourceStatusClass(source)">{{ getSourceStatusText(source) }}</span>
+                  </div>
+                  <div class="source-details">
+                    <div class="detail-row">
+                      <span class="detail-label">Stratum:</span>
+                      <span class="detail-value">{{ source.stratum || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Offset:</span>
+                      <span class="detail-value">{{ source.offset || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="no-sources">
+                <p>No NTP sources configured</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Area 6: Server Management -->
-        <div class="grid-area area-6">
-          <div class="panel-section management-section">
-            <h2 class="section-title">Server Management</h2>
-            
-            <!-- Current Servers -->
-            <div class="servers-section">
-              <h3 class="subsection-title">Current NTP Servers</h3>
-              <div v-if="servers.length > 0" class="servers-list">
-                <div v-for="(server, index) in servers" :key="index" class="server-item">
-                  <span class="server-name">{{ server.name }}</span>
-                  <span class="server-status" :class="getServerStatusClass(server)">{{ getServerStatus(server) }}</span>
+        <!-- Area 4: Activity Statistics -->
+        <div class="grid-area area-4">
+          <div class="panel-section activity-section">
+            <h2 class="section-title">Activity Statistics</h2>
+            <div class="activity-grid">
+              <div class="activity-card success">
+                <div class="activity-icon">✅</div>
+                <div class="activity-info">
+                  <div class="activity-label">Success</div>
+                  <div class="activity-value">{{ status.activity?.ok_count || '0' }}</div>
                 </div>
               </div>
-              <div v-else class="no-servers">
-                <p>No NTP servers configured</p>
+              <div class="activity-card error">
+                <div class="activity-icon">❌</div>
+                <div class="activity-info">
+                  <div class="activity-label">Failed</div>
+                  <div class="activity-value">{{ status.activity?.failed_count || '0' }}</div>
+                </div>
+              </div>
+              <div class="activity-card warning">
+                <div class="activity-icon">⚠️</div>
+                <div class="activity-info">
+                  <div class="activity-label">Bogus</div>
+                  <div class="activity-value">{{ status.activity?.bogus_count || '0' }}</div>
+                </div>
+              </div>
+              <div class="activity-card timeout">
+                <div class="activity-icon">⏱️</div>
+                <div class="activity-info">
+                  <div class="activity-label">Timeouts</div>
+                  <div class="activity-value">{{ status.activity?.timeout_count || '0' }}</div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Add New Servers -->
-            <div class="servers-section">
-              <h3 class="subsection-title">Configure NTP Servers</h3>
-              <div class="add-servers-form">
-                <textarea 
-                  v-model="newServers"
-                  placeholder="pool.ntp.org&#10;time.google.com&#10;time.windows.com"
-                  rows="3"
-                  class="form-textarea"
-                ></textarea>
-                <div class="form-actions">
-                  <button 
-                    @click="addServers" 
-                    :disabled="loading.servers || !newServers.trim()"
-                    class="action-btn primary"
-                  >
-                    <span v-if="loading.servers" class="loading-spinner">⏳</span>
-                    <span v-else>Add Servers</span>
-                  </button>
-                  <button 
-                    @click="setDefaultServers" 
-                    :disabled="loading.servers"
-                    class="action-btn secondary"
-                  >
-                    <span v-if="loading.servers" class="loading-spinner">⏳</span>
-                    <span v-else>Set Default</span>
-                  </button>
-                  <button 
-                    @click="clearServers" 
-                    :disabled="loading.servers"
-                    class="action-btn danger"
-                  >
-                    <span v-if="loading.servers" class="loading-spinner">⏳</span>
-                    <span v-else>Clear All</span>
-                  </button>
+        <!-- Area 5: Server Mode -->
+        <div class="grid-area area-5">
+          <div class="panel-section server-mode-section">
+            <h2 class="section-title">Server Mode</h2>
+            <div class="server-mode-content">
+              <div class="mode-status">
+                <div class="status-indicator" :class="{ active: serverModeEnabled }">
+                  <span class="indicator-dot"></span>
+                  <span class="status-text">{{ serverModeEnabled ? 'ON' : 'OFF' }}</span>
+                </div>
+                <div class="mode-description">
+                  {{ serverModeEnabled ? 'Accepting client connections' : 'Not accepting connections' }}
+                </div>
+              </div>
+              <div class="mode-controls">
+                <button 
+                  @click="toggleServerMode" 
+                  :disabled="loading.serverMode"
+                  class="mode-btn"
+                  :class="{ enabled: serverModeEnabled, disabled: !serverModeEnabled }"
+                >
+                  <span v-if="loading.serverMode" class="loading-spinner">⏳</span>
+                  <span v-else>{{ serverModeEnabled ? 'Disable' : 'Enable' }}</span>
+                </button>
+              </div>
+              <div class="mode-info">
+                <div class="info-item">
+                  <span class="info-label">Port:</span>
+                  <span class="info-value">123/UDP</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Stratum:</span>
+                  <span class="info-value">{{ status.tracking?.Stratum || 'Unknown' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Area 6: Quick Actions -->
+        <div class="grid-area area-6">
+          <div class="panel-section quick-actions-section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="quick-actions-content">
+              <!-- System Info -->
+              <div class="system-info">
+                <div class="info-card">
+                  <div class="info-icon">ℹ️</div>
+                  <div class="info-content">
+                    <div class="info-title">System</div>
+                    <div class="info-details">
+                      <div class="detail-item">
+                        <span class="detail-label">Ver:</span>
+                        <span class="detail-value">v{{ versionInfo.version }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Up:</span>
+                        <span class="detail-value">{{ getUptime() }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="actions-grid">
+                <button @click="refreshStatus" class="quick-action-btn" title="Refresh Status">
+                  <span class="action-icon">🔄</span>
+                  <span class="action-text">Refresh</span>
+                </button>
+                <button @click="resetConfiguration" class="quick-action-btn" title="Reset Configuration">
+                  <span class="action-icon">⚡</span>
+                  <span class="action-text">Reset</span>
+                </button>
+                <button @click="showLogs" class="quick-action-btn" title="View Logs">
+                  <span class="action-icon">📋</span>
+                  <span class="action-text">Logs</span>
+                </button>
+                <button @click="openAdvancedManagement" class="quick-action-btn" title="Advanced Management">
+                  <span class="action-icon">⚙️</span>
+                  <span class="action-text">Advanced</span>
+                </button>
+              </div>
+
+              <!-- Status Summary -->
+              <div class="status-summary">
+                <div class="summary-item">
+                  <span class="summary-icon">📡</span>
+                  <span class="summary-text">{{ getActiveSourcesCount() }} Sources</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-icon">⏰</span>
+                  <span class="summary-text">{{ getSyncStatusText() }}</span>
                 </div>
               </div>
             </div>
@@ -320,7 +307,8 @@ export default {
       newServers: '',
       loading: {
         status: false,
-        servers: false
+        servers: false,
+        serverMode: false
       },
       error: '',
       success: '',
@@ -329,6 +317,7 @@ export default {
       refreshInterval: null,
       lastUpdateTime: 'Never',
       showVersionTooltip: false,
+      serverModeEnabled: false,
       versionInfo: {
         version: '0.1.0-dev',
         buildDate: new Date().toISOString(),
@@ -341,6 +330,7 @@ export default {
     this.loadStatus()
     this.loadServers()
     this.loadVersionInfo()
+    this.loadServerModeStatus()
     this.startAutoRefresh()
     
     // Add click outside listener for version tooltip
@@ -392,6 +382,70 @@ export default {
       } catch (err) {
         console.log('Failed to load version info, using defaults')
       }
+    },
+
+    async loadServerModeStatus() {
+      try {
+        const response = await fetch(`${this.apiConfig.clockApi}/chrony/server-mode`)
+        if (response.ok) {
+          const data = await response.json()
+          this.serverModeEnabled = data.server_mode_enabled || false
+        }
+      } catch (err) {
+        console.log('Failed to load server mode status')
+      }
+    },
+
+    async toggleServerMode() {
+      this.loading.serverMode = true
+      try {
+        const response = await fetch(`${this.apiConfig.clockApi}/chrony/server-mode`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ enabled: !this.serverModeEnabled })
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          this.serverModeEnabled = data.server_mode_enabled
+          this.success = `Server mode ${this.serverModeEnabled ? 'enabled' : 'disabled'} successfully`
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+      } catch (err) {
+        this.error = `Failed to toggle server mode: ${err.message}`
+      } finally {
+        this.loading.serverMode = false
+      }
+    },
+
+    getUptime() {
+      // This would typically come from the API
+      return '2 days, 14 hours'
+    },
+
+    refreshStatus() {
+      this.loadStatus()
+      this.loadServers()
+      this.loadServerModeStatus()
+    },
+
+    resetConfiguration() {
+      if (confirm('Are you sure you want to reset the NTP configuration to defaults?')) {
+        this.setDefaultServers()
+      }
+    },
+
+    showLogs() {
+      // This would open a logs modal or navigate to logs page
+      alert('Logs feature coming soon!')
+    },
+
+    openAdvancedManagement() {
+      // This would navigate to advanced management page
+      alert('Advanced management page coming soon!')
     },
 
     async loadStatus() {
@@ -544,6 +598,7 @@ export default {
       }
       this.refreshInterval = setInterval(() => {
         this.loadStatus()
+        this.loadServerModeStatus()
       }, 5000) // Refresh every 5 seconds
     },
 
@@ -920,7 +975,7 @@ export default {
 .ntp-content {
   display: flex;
   flex: 1;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1.5rem;
   overflow: hidden;
 }
 
@@ -928,7 +983,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
   height: 100%;
 }
@@ -966,7 +1021,7 @@ export default {
 .panel-section {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -978,12 +1033,12 @@ export default {
 
 .section-title {
   color: #2c3e50;
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
   text-align: center;
   font-weight: 700;
   border-bottom: 2px solid #e9ecef;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
 }
 
 .subsection-title {
@@ -997,14 +1052,14 @@ export default {
 .status-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   flex: 1;
 }
 
 .status-card {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1062,7 +1117,7 @@ export default {
 .tracking-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex: 1;
   overflow-y: auto;
 }
@@ -1070,7 +1125,7 @@ export default {
 .tracking-item {
   background: #f8f9fa;
   border-radius: 8px;
-  padding: 0.75rem;
+  padding: 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1147,27 +1202,53 @@ export default {
 /* Sources Section */
 .sources-container {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .sources-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  max-height: calc(100% - 2rem);
+}
+
+.sources-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sources-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sources-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.sources-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .source-item {
   background: #f8f9fa;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border: 1px solid #e9ecef;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .source-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .source-item.current {
@@ -1194,22 +1275,27 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .source-name {
   color: #2c3e50;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .source-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.6rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 12px;
+  font-size: 0.5rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
 }
 
 .source-status.current {
@@ -1238,9 +1324,9 @@ export default {
 }
 
 .source-details {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .detail-row {
@@ -1251,13 +1337,13 @@ export default {
 
 .detail-label {
   color: #6c757d;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
 .detail-value {
   color: #2c3e50;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
@@ -1265,14 +1351,14 @@ export default {
 .activity-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   flex: 1;
 }
 
 .activity-card {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
@@ -1667,5 +1753,263 @@ export default {
   .action-btn {
     justify-content: center;
   }
+}
+
+/* Area 5: Server Mode Styles */
+.server-mode-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.server-mode-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.75rem;
+}
+
+.mode-status {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.indicator-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f44336;
+  transition: background 0.3s ease;
+}
+
+.status-indicator.active .indicator-dot {
+  background: #4CAF50;
+}
+
+.status-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.mode-description {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.mode-controls {
+  display: flex;
+  justify-content: center;
+}
+
+.mode-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mode-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mode-btn.enabled {
+  background: #f44336;
+  color: white;
+}
+
+.mode-btn.enabled:hover:not(:disabled) {
+  background: #d32f2f;
+}
+
+.mode-btn.disabled {
+  background: #4CAF50;
+  color: white;
+}
+
+.mode-btn.disabled:hover:not(:disabled) {
+  background: #388E3C;
+}
+
+.mode-info {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.info-value {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Area 6: Quick Actions Styles */
+.quick-actions-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-actions-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.system-info {
+  margin-bottom: 1rem;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.info-icon {
+  font-size: 1.5rem;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.info-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.detail-label {
+  color: #666;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.quick-action-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.quick-action-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: #2196F3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon {
+  font-size: 1.2rem;
+}
+
+.action-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.status-summary {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: auto;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-icon {
+  font-size: 1rem;
+}
+
+.summary-text {
+  font-size: 0.85rem;
+  color: #333;
+  font-weight: 500;
 }
 </style> 
