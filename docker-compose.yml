@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  # Hub Application (Frontend Only - For Development)
+  hub:
+    build: .
+    container_name: el-brick-hub-dev
+    restart: unless-stopped
+    ports:
+      - "17002:17002"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./src:/app/src:ro
+      - ./public:/app/public:ro 
