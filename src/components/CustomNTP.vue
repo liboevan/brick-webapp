@@ -325,7 +325,6 @@ export default {
     this.apiConfig = getApiConfig()
     this.loadStatus()
     this.loadVersionInfo()
-    this.loadServerModeStatus()
     this.startAutoRefresh()
     
     // Add click outside listener for version tooltip
@@ -382,21 +381,6 @@ export default {
       }
     },
 
-    async loadServerModeStatus() {
-      try {
-        const config = window.BRICK_CONFIG.api.customNTP
-        const response = await fetch(`${config.baseUrl}${config.endpoints.serverMode}`)
-        if (response.ok) {
-          const data = await response.json()
-          console.log('Server mode response:', data)
-          // The API returns: { server_mode_enabled: bool }
-          this.serverModeEnabled = data.server_mode_enabled || false
-        }
-      } catch (err) {
-        console.log('Failed to load server mode status:', err.message)
-      }
-    },
-
     async toggleServerMode() {
       this.loading.serverMode = true
       try {
@@ -430,7 +414,6 @@ export default {
 
     refreshStatus() {
       this.loadStatus()
-      this.loadServerModeStatus()
     },
 
     resetConfiguration() {
@@ -461,6 +444,8 @@ export default {
           const data = await response.json()
           // Transform customNTP API response to expected format
           this.status = this.transformStatusResponse(data)
+          // Set serverModeEnabled from status response
+          this.serverModeEnabled = data.server_mode_enabled || false
           this.lastUpdateTime = new Date().toLocaleTimeString()
         } else {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
@@ -566,7 +551,6 @@ export default {
       }
       this.refreshInterval = setInterval(() => {
         this.loadStatus()
-        this.loadServerModeStatus()
       }, 5000) // Refresh every 5 seconds
     },
 
