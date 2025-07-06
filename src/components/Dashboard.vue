@@ -78,14 +78,10 @@ export default {
   },
   methods: {
     navigateToFeature(feature) {
-      // Skip authentication - allow direct access to features
-      console.log(`Navigating to: ${feature.url}`)
-      
-      // Navigate to the appropriate route based on feature
-      if (feature.id === 'ntp') {
-        this.$router.push('/ntp')
+      // 直接跳转到 feature.url
+      if (feature.url) {
+        this.$router.push(feature.url)
       } else {
-        // For other features, show an alert for now
         alert(`Feature: ${feature.title}\nURL: ${feature.url}\n\nThis would navigate to the actual feature.`)
       }
     },

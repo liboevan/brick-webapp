@@ -256,18 +256,6 @@
                   <span class="action-text">Advanced</span>
                 </button>
               </div>
-
-              <!-- Status Summary -->
-              <div class="status-summary">
-                <div class="summary-item">
-                  <span class="summary-icon">📡</span>
-                  <span class="summary-text">{{ getActiveSourcesCount() }} Sources</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-icon">⏰</span>
-                  <span class="summary-text">{{ getSyncStatusText() }}</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -579,7 +567,8 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
+  min-height: 40px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 2px solid rgba(76, 175, 80, 0.2);
@@ -1857,35 +1846,5 @@ export default {
   font-size: 0.8rem;
   font-weight: 500;
   color: #333;
-}
-
-.status-summary {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-top: auto;
-}
-
-.summary-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.summary-item:last-child {
-  border-bottom: none;
-}
-
-.summary-icon {
-  font-size: 1rem;
-}
-
-.summary-text {
-  font-size: 0.85rem;
-  color: #333;
-  font-weight: 500;
 }
 </style> 
