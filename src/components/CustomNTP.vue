@@ -636,10 +636,8 @@ export default {
   color: #34495e;
   font-size: 0.85rem;
   cursor: pointer;
-  background: #f8f9fa;
   padding: 0.5rem 1rem;
   border-radius: 25px;
-  border: 1px solid #e9ecef;
   transition: all 0.3s ease;
   font-weight: 500;
 }
