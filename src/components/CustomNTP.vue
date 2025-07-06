@@ -300,14 +300,10 @@ export default {
       status: {
         tracking: {},
         sources: [],
-        activity: {},
-        clients: []
+        activity: {}
       },
-      servers: [],
-      newServers: '',
       loading: {
         status: false,
-        servers: false,
         serverMode: false
       },
       error: '',
@@ -328,7 +324,6 @@ export default {
   mounted() {
     this.apiConfig = getApiConfig()
     this.loadStatus()
-    this.loadServers()
     this.loadVersionInfo()
     this.loadServerModeStatus()
     this.startAutoRefresh()
@@ -370,9 +365,12 @@ export default {
 
     async loadVersionInfo() {
       try {
-        const response = await fetch(`${this.apiConfig.clockApi}/version`)
+        const config = window.BRICK_CONFIG.api.customNTP
+        const response = await fetch(`${config.baseUrl}${config.endpoints.version}`)
         if (response.ok) {
           const data = await response.json()
+          console.log('Version response:', data)
+          // The API returns: { version: "string", build_datetime: "string" }
           this.versionInfo = {
             version: data.version || '0.1.0-dev',
             buildDate: data.build_datetime || new Date().toISOString(),
@@ -380,26 +378,30 @@ export default {
           }
         }
       } catch (err) {
-        console.log('Failed to load version info, using defaults')
+        console.log('Failed to load version info, using defaults:', err.message)
       }
     },
 
     async loadServerModeStatus() {
       try {
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/server-mode`)
+        const config = window.BRICK_CONFIG.api.customNTP
+        const response = await fetch(`${config.baseUrl}${config.endpoints.serverMode}`)
         if (response.ok) {
           const data = await response.json()
+          console.log('Server mode response:', data)
+          // The API returns: { server_mode_enabled: bool }
           this.serverModeEnabled = data.server_mode_enabled || false
         }
       } catch (err) {
-        console.log('Failed to load server mode status')
+        console.log('Failed to load server mode status:', err.message)
       }
     },
 
     async toggleServerMode() {
       this.loading.serverMode = true
       try {
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/server-mode`, {
+        const config = window.BRICK_CONFIG.api.customNTP
+        const response = await fetch(`${config.baseUrl}${config.endpoints.serverMode}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -422,19 +424,19 @@ export default {
     },
 
     getUptime() {
-      // This would typically come from the API
-      return '2 days, 14 hours'
+      // Cannot get uptime from the API, so return N/A
+      return 'N/A'
     },
 
     refreshStatus() {
       this.loadStatus()
-      this.loadServers()
       this.loadServerModeStatus()
     },
 
     resetConfiguration() {
       if (confirm('Are you sure you want to reset the NTP configuration to defaults?')) {
-        this.setDefaultServers()
+        // Reset functionality removed - no server management UI
+        this.success = 'Reset functionality not implemented'
       }
     },
 
@@ -451,9 +453,14 @@ export default {
     async loadStatus() {
       this.loading.status = true
       try {
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/status`)
+        // Use flag 23 to exclude clients data (1+2+4+16 = 23)
+        // 1=tracking, 2=sources, 4=activity, 16=server_mode (excludes 8=clients)
+        const config = window.BRICK_CONFIG.api.customNTP
+        const response = await fetch(`${config.baseUrl}${config.endpoints.status}?flags=23`)
         if (response.ok) {
-          this.status = await response.json()
+          const data = await response.json()
+          // Transform customNTP API response to expected format
+          this.status = this.transformStatusResponse(data)
           this.lastUpdateTime = new Date().toLocaleTimeString()
         } else {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
@@ -465,80 +472,41 @@ export default {
       }
     },
 
-    async loadServers() {
-      try {
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/servers`)
-        if (response.ok) {
-          const data = await response.json()
-          this.servers = this.parseServers(data.servers || '')
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-      } catch (err) {
-        this.error = `Failed to load servers: ${err.message}`
-      }
-    },
-
-    parseServers(serversOutput) {
-      if (!serversOutput) return []
+    transformStatusResponse(data) {
+      // Debug: Log the actual API response
+      console.log('CustomNTP API response:', data)
       
-      const lines = serversOutput.split('\n')
-      const servers = []
-      
-      for (const line of lines) {
-        if (line.includes('^') || line.includes('*') || line.includes('+')) {
-          const parts = line.trim().split(/\s+/)
-          if (parts.length >= 2) {
-            servers.push({
-              name: parts[1],
-              status: parts[0],
-              raw: line
-            })
-          }
-        }
+      // Transform customNTP API response to expected format
+      // The API returns: { tracking: {...}, sources: [...], activity: {...}, server_mode_enabled: bool }
+      const transformed = {
+        tracking: data.tracking || {},
+        sources: data.sources || [],
+        activity: data.activity || {}
       }
       
-      return servers
-    },
-
-    getServerStatus(server) {
-      const statusMap = {
-        '^': 'Current',
-        '*': 'Selected',
-        '+': 'Candidate',
-        '-': 'Rejected',
-        '?': 'Unknown'
-      }
-      return statusMap[server.status] || 'Unknown'
-    },
-
-    getServerStatusClass(server) {
-      const classMap = {
-        '^': 'current',
-        '*': 'selected',
-        '+': 'candidate',
-        '-': 'rejected',
-        '?': 'unknown'
-      }
-      return classMap[server.status] || 'unknown'
+      console.log('Transformed status:', transformed)
+      return transformed
     },
 
     getSyncStatusText() {
       if (!this.status.tracking) return 'Unknown'
-      if (this.status.tracking.LeapStatus === 'Normal') return 'Synchronized'
-      if (this.status.tracking.LeapStatus === 'Not synchronised') return 'Not Synced'
-      return this.status.tracking.LeapStatus || 'Unknown'
+      const leapStatus = this.status.tracking['Leap status'] || this.status.tracking.LeapStatus
+      if (leapStatus === 'Normal') return 'Synchronized'
+      if (leapStatus === 'Not synchronised') return 'Not Synced'
+      return leapStatus || 'Unknown'
     },
 
     getSyncStatusClass() {
       if (!this.status.tracking) return 'unknown'
-      if (this.status.tracking.LeapStatus === 'Normal') return 'synced'
+      const leapStatus = this.status.tracking['Leap status'] || this.status.tracking.LeapStatus
+      if (leapStatus === 'Normal') return 'synced'
       return 'not-synced'
     },
 
     getLeapStatusClass() {
-      if (!this.status.tracking || !this.status.tracking['Leap status']) return 'unknown'
-      const leapStatus = this.status.tracking['Leap status']
+      if (!this.status.tracking) return 'unknown'
+      const leapStatus = this.status.tracking['Leap status'] || this.status.tracking.LeapStatus
+      if (!leapStatus) return 'unknown'
       if (leapStatus === 'Normal') return 'synced'
       if (leapStatus.includes('Leap')) return 'warning'
       return 'not-synced'
@@ -609,80 +577,6 @@ export default {
       }
     },
 
-    async addServers() {
-      if (!this.newServers.trim()) return
-      
-      this.loading.servers = true
-      try {
-        const serverList = this.newServers
-          .split(/[\n,]/)
-          .map(s => s.trim())
-          .filter(s => s.length > 0)
-        
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/servers`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ servers: serverList })
-        })
-        
-        if (response.ok) {
-          this.success = `Added ${serverList.length} server(s) successfully`
-          this.newServers = ''
-          await this.loadServers()
-          await this.loadStatus() // Refresh status
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-      } catch (err) {
-        this.error = `Failed to add servers: ${err.message}`
-      } finally {
-        this.loading.servers = false
-      }
-    },
-
-    async setDefaultServers() {
-      this.loading.servers = true
-      try {
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/servers/default`, {
-          method: 'PUT'
-        })
-        
-        if (response.ok) {
-          this.success = 'Default servers set successfully'
-          await this.loadServers()
-          await this.loadStatus() // Refresh status
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-      } catch (err) {
-        this.error = `Failed to set default servers: ${err.message}`
-      } finally {
-        this.loading.servers = false
-      }
-    },
-
-    async clearServers() {
-      this.loading.servers = true
-      try {
-        const response = await fetch(`${this.apiConfig.clockApi}/chrony/servers`, {
-          method: 'DELETE'
-        })
-        
-        if (response.ok) {
-          this.success = 'All servers cleared successfully'
-          this.servers = []
-          await this.loadStatus() // Refresh status
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-      } catch (err) {
-        this.error = `Failed to clear servers: ${err.message}`
-      } finally {
-        this.loading.servers = false
-      }
-    }
   }
 }
 </script>

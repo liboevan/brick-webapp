@@ -21,13 +21,13 @@ export const getConfig = () => {
     // Features from runtime config
     features: [
       {
-        id: 'ntp',
-        title: config.features.clock.title,
-        description: config.features.clock.description,
-        icon: config.features.clock.icon,
-        url: config.features.clock.url,
-        color: config.features.clock.color,
-        enabled: config.features.clock.enabled
+        id: 'customNTP',
+        title: config.features.customNTP.title,
+        description: config.features.customNTP.description,
+        icon: config.features.customNTP.icon,
+        url: config.features.customNTP.url,
+        color: config.features.customNTP.color,
+        enabled: config.features.customNTP.enabled
       },
       {
         id: 'security',
@@ -79,7 +79,7 @@ export const getApiConfig = () => {
   const config = getRuntimeConfig()
   return {
     gatewayUrl: config.api.baseUrl,
-    clockApi: config.api.clock.baseUrl, // Use the clock baseUrl directly
+    customNTPApi: config.api.customNTP.baseUrl, // Use the customNTP baseUrl directly
     sentinelApi: config.api.sentinel.baseUrl
   }
 }

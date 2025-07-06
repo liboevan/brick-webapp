@@ -1,12 +1,14 @@
 #!/bin/bash
 
-# Common configuration for brick-hub
+# Shared Configuration for Brick Hub Scripts
+# This file contains common variables and functions used by all scripts
+
+# Project Configuration
 PROJECT_NAME="brick-hub"
-SERVICE_NAME="hub"
+IMAGE_NAME="el/brick-hub"
+CONTAINER_NAME="el-brick-hub"
+API_PORT="17002"
 DEFAULT_VERSION="0.1.0-dev"
-DEFAULT_IMAGE_NAME="el/brick-hub"
-DEFAULT_CONTAINER_NAME="el-brick-hub"
-DEFAULT_PORT="17002"
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,67 +17,63 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+# Function to print colored output
+print_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
 }
 
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+print_warning() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
+print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Get version from package.json or use default
-get_version() {
-    if [ -f "package.json" ]; then
-        node -p "require('./package.json').version" 2>/dev/null || echo "$DEFAULT_VERSION"
+print_header() {
+    echo -e "${BLUE}======================================"
+    echo -e "Brick Hub - $1"
+    echo -e "======================================${NC}"
+}
+
+# Common Docker operations
+cleanup_container() {
+    print_info "Cleaning up existing container..."
+    docker stop $CONTAINER_NAME 2>/dev/null || true
+    docker rm $CONTAINER_NAME 2>/dev/null || true
+}
+
+run_container() {
+    local version_arg="$1"
+    if [ -n "$version_arg" ]; then
+        VERSION="$version_arg"
     else
-        echo "$DEFAULT_VERSION"
+        VERSION="$DEFAULT_VERSION"
     fi
+    print_info "Running $CONTAINER_NAME (version: $VERSION)..."
+    docker run -d --name $CONTAINER_NAME \
+      --network el-brick-network \
+      -e NODE_ENV=production \
+      -p $API_PORT:$API_PORT \
+      $IMAGE_NAME:$VERSION
+    print_info "Container started!"
+    echo "   Web App: http://localhost:$API_PORT"
+    echo "   Version: $VERSION"
 }
 
-# Get current datetime for build info
-get_build_datetime() {
-    date -u +"%Y-%m-%dT%H:%M:%SZ"
+wait_for_api() {
+    print_info "Waiting for web application to be ready..."
+    for i in {1..30}; do
+        if curl -s http://localhost:$API_PORT > /dev/null 2>&1; then
+            print_info "Web application is ready!"
+            return 0
+        fi
+        if [ $i -eq 30 ]; then
+            print_error "Web application failed to start within 30 seconds"
+            return 1
+        fi
+        sleep 1
+    done
 }
 
-# Check if Docker is running
-check_docker() {
-    if ! docker info >/dev/null 2>&1; then
-        log_error "Docker is not running or not accessible"
-        exit 1
-    fi
-}
-
-# Check if container exists
-container_exists() {
-    docker ps -a --format "table {{.Names}}" | grep -q "^$DEFAULT_CONTAINER_NAME$"
-}
-
-# Check if container is running
-container_running() {
-    docker ps --format "table {{.Names}}" | grep -q "^$DEFAULT_CONTAINER_NAME$"
-}
-
-# Check if Node.js is installed
-check_node() {
-    if ! command -v node &> /dev/null; then
-        log_error "Node.js is not installed or not in PATH"
-        exit 1
-    fi
-}
-
-# Check if npm is installed
-check_npm() {
-    if ! command -v npm &> /dev/null; then
-        log_error "npm is not installed or not in PATH"
-        exit 1
-    fi
-} 
+ 

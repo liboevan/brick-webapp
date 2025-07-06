@@ -1,36 +1,41 @@
 #!/bin/bash
 
-# Build Information Generator
-# Generates version and build date for the application
+# Build Info Script for Brick Hub
+# Generates build metadata for the Vue.js application
 
 set -e
 
-# Default version
-DEFAULT_VERSION="0.1.0-dev"
-
 # Get version from environment or use default
-VERSION=${VERSION:-$DEFAULT_VERSION}
-
-# Generate build date
-BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+VERSION=${VERSION:-0.1.0-dev}
+BUILD_DATETIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_TIMESTAMP=$(date +%s)
 
-# Create build info object
-BUILD_INFO=$(cat <<EOF
+# Create build info JSON
+cat > public/build-info.json << EOF
+{
+  "version": "$VERSION",
+  "buildDateTime": "$BUILD_DATETIME",
+  "buildTimestamp": $BUILD_TIMESTAMP,
+  "environment": "production",
+  "service": "brick-hub",
+  "description": "Frontend Application"
+}
+EOF
+
+# Create build info JS for frontend consumption
+cat > public/build-info.js << EOF
 window.BUILD_INFO = {
-  version: '$VERSION',
-  buildDate: '$BUILD_DATE',
+  version: "$VERSION",
+  buildDateTime: "$BUILD_DATETIME",
   buildTimestamp: $BUILD_TIMESTAMP,
-  environment: '${NODE_ENV:-production}'
+  environment: "production",
+  service: "brick-hub",
+  description: "Frontend Application"
 };
 EOF
-)
 
-# Create build info file
-echo "$BUILD_INFO" > public/build-info.js
-
-echo "📦 Build Information Generated:"
-echo "   Version: $VERSION"
-echo "   Build Date: $BUILD_DATE"
-echo "   Environment: ${NODE_ENV:-production}"
-echo "   File: public/build-info.js" 
+echo "Build info generated:"
+echo "  Version: $VERSION"
+echo "  Build DateTime: $BUILD_DATETIME"
+echo "  Build Timestamp: $BUILD_TIMESTAMP"
+echo "  Files: public/build-info.json, public/build-info.js" 

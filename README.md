@@ -1,35 +1,35 @@
-# Brick Hub - Frontend Application
+# Brick Hub
 
-A modern Vue.js 3 application serving as the central dashboard and user interface for the Brick ecosystem. Provides unified access to all Brick services including NTP management, security monitoring, and system administration.
+> A modern Vue.js 3 dashboard for the Brick ecosystem
 
-## 🚀 Features
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.4+-green.svg)](https://vuejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com/)
 
-- **Unified Dashboard**: Single interface for all Brick services
-- **Real-time Monitoring**: Live status and metrics for all components
-- **Custom NTP Management**: Advanced time synchronization configuration
-- **Security Sentinel**: User authentication and system security
-- **Gateway Monitoring**: Reverse proxy and traffic management
-- **Responsive Design**: Mobile-first, modern UI with green theme
-- **Runtime Configuration**: Configure without rebuilding
-- **Docker Ready**: Production-ready containerization
+Brick Hub is the central dashboard and user interface for the Brick ecosystem, providing unified access to all Brick services including NTP management, security monitoring, and system administration.
 
-## 📋 Prerequisites
+## ✨ Features
 
-- Node.js 18+ and npm
-- Docker and Docker Compose (for production)
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+- **🎛️ Unified Dashboard** - Single interface for all Brick services
+- **📊 Real-time Monitoring** - Live status and metrics for all components
+- **🕐 Custom NTP Management** - Advanced time synchronization configuration
+- **🛡️ Security Sentinel** - User authentication and system security
+- **🚪 Gateway Monitoring** - Reverse proxy and traffic management
+- **📱 Responsive Design** - Mobile-first, modern UI with green theme
+- **⚙️ Runtime Configuration** - Configure without rebuilding
+- **🐳 Docker Ready** - Production-ready containerization
 
-## 🛠️ Quick Start
+## 🚀 Quick Start
 
-### Option 1: One-Command Setup (Recommended)
+### One-Command Setup (Recommended)
 
 ```bash
 ./scripts/quick_start.sh
 ```
 
-This performs a complete build → docker build → run cycle.
+This performs a complete build → run → launch cycle.
 
-### Option 2: Development Mode
+### Development Mode
 
 ```bash
 # Install dependencies
@@ -40,48 +40,62 @@ npm run dev
 # Access at http://localhost:3000
 ```
 
-### Option 3: Step-by-Step Production
+### Production Deployment
 
 ```bash
-# Build the application
+# Build Docker image
 ./scripts/quick_start.sh build
 
-# Build Docker image
-./scripts/quick_start.sh docker-build
-
 # Run container
-./scripts/quick_start.sh docker-run
+./scripts/quick_start.sh run
+
+# Or do both in one command
+./scripts/quick_start.sh all
 ```
 
-## 📚 Scripts Reference
+## 📋 Prerequisites
+
+- **Node.js** 18+ and npm
+- **Docker** and Docker Compose (for production)
+- **Modern web browser** (Chrome, Firefox, Safari, Edge)
+
+## 🛠️ Scripts Reference
 
 ### Main Management Script
 
 ```bash
-./scripts/quick_start.sh [command]
+./scripts/quick_start.sh [action] [version]
 ```
 
-**Commands:**
-- `dev` - Start development server
-- `build` - Build application only
-- `docker-build` - Build Docker image only
-- `docker-run` - Run container only
-- `docker-stop` - Stop and remove container
-- `clean` - Clean build artifacts
-- `docker-clean` - Clean Docker artifacts
-- `install` - Install dependencies
-- `test` - Run linting tests
-- `default` - Full cycle (build → docker-build → docker-run)
+| Action | Description |
+|--------|-------------|
+| `build` | Build Docker image only |
+| `run` | Run container only |
+| `test` | Test web application (browser interface) |
+| `clean` | Clean container and optionally images |
+| `logs` | Show container logs |
+| `status` | Show container status and URLs |
+| `all` (default) | Full cycle (build → run → launch) |
+
+**Examples:**
+```bash
+./scripts/quick_start.sh                    # Full cycle with default version
+./scripts/quick_start.sh build              # Build only
+./scripts/quick_start.sh run                # Run only
+./scripts/quick_start.sh 1.0.0             # Full cycle with version 1.0.0
+./scripts/quick_start.sh build 1.0.0       # Build with version 1.0.0
+./scripts/quick_start.sh clean --image      # Clean container and all images
+```
 
 ### Individual Scripts
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `dev.sh` | Development workflow | `./scripts/dev.sh [mode]` |
-| `docker.sh` | Docker operations | `./scripts/docker.sh [action]` |
-| `deploy.sh` | Production deployment | `./scripts/deploy.sh [action]` |
-| `config-switch.sh` | Configuration management | `./scripts/config-switch.sh [env]` |
-| `build-info.sh` | Build metadata | `./scripts/build-info.sh` |
+| `build-info.sh` | Generate build metadata | `./scripts/build-info.sh` |
+| `clean.sh` | Clean container and images | `./scripts/clean.sh [--image]` |
+| `config.sh` | Shared configuration | Used by other scripts |
+| `run.sh` | Run container | `./scripts/run.sh [version]` |
+| `build.sh` | Build Docker image | `./scripts/build.sh [version]` |
 
 ## 🏗️ Project Structure
 
@@ -106,11 +120,11 @@ brick-hub/
 │   └── build-info.js       # Build metadata
 ├── scripts/                # Management scripts
 │   ├── quick_start.sh      # Main management script
-│   ├── dev.sh              # Development workflow
-│   ├── docker.sh           # Docker operations
-│   ├── deploy.sh           # Production deployment
-│   ├── config-switch.sh    # Configuration switching
-│   └── build-info.sh       # Build metadata generation
+│   ├── build-info.sh       # Build metadata generation
+│   ├── clean.sh            # Clean build artifacts
+│   ├── config.sh           # Configuration switching
+│   ├── run.sh              # Quick run script
+│   └── build.sh            # Build script
 ├── package.json            # Dependencies and scripts
 ├── vite.config.js          # Build configuration
 ├── Dockerfile              # Production container
@@ -118,7 +132,7 @@ brick-hub/
 └── README.md               # This file
 ```
 
-## 🔧 Configuration
+## ⚙️ Configuration
 
 ### Runtime Configuration System
 
@@ -132,13 +146,13 @@ The application uses a sophisticated runtime configuration system that allows **
 **Quick Configuration Switch:**
 ```bash
 # Switch to development
-./scripts/config-switch.sh dev
+./scripts/config.sh dev
 
 # Switch to production  
-./scripts/config-switch.sh prod
+./scripts/config.sh prod
 
 # Show current config
-./scripts/config-switch.sh show
+./scripts/config.sh show
 ```
 
 **Configuration Structure:**
@@ -147,12 +161,14 @@ window.BRICK_CONFIG = {
   // API Configuration - All through gateway
   api: {
     baseUrl: 'http://localhost:17000/api',
-    clock: {
-      baseUrl: 'http://localhost:17000/api/clock',
+    customNTP: {
+      baseUrl: 'http://localhost:17000/api/customNTP',
       endpoints: {
-        currentTime: '/current-time',
-        timezone: '/timezone',
-        format: '/format'
+        status: '/status',
+        servers: '/servers',
+        serverMode: '/server-mode',
+        version: '/version',
+        defaultServers: '/servers/default'
       }
     },
     sentinel: {
@@ -175,12 +191,12 @@ window.BRICK_CONFIG = {
 
   // Feature Configuration
   features: {
-    clock: {
+    customNTP: {
       enabled: true,
       title: 'Custom NTP',
       description: 'Configure and manage NTP time synchronization',
       icon: '🕐',
-      url: '/clock',
+      url: '/customNTP',
       color: '#4CAF50'
     },
     sentinel: {
@@ -238,15 +254,9 @@ The application integrates with these Brick ecosystem services:
 
 | Service | Purpose | Default Port | API Path |
 |---------|---------|--------------|----------|
-| **brick-clock** | NTP time synchronization | 17003 | `/api/clock/*` |
+| **customNTP** | NTP time synchronization | 17003 | `/api/customNTP/*` |
 | **brick-sentinel** | Authentication & security | 17001 | `/api/sentinel/*` |
 | **brick-gateway** | Reverse proxy & routing | 17000 | `/api/*` |
-
-### API Documentation
-
-- **Clock API**: NTP management and time synchronization
-- **Sentinel API**: User authentication and security monitoring
-- **Gateway API**: Reverse proxy and traffic management
 
 All APIs are accessed through the gateway at `http://localhost:17000/api/`.
 
@@ -267,7 +277,7 @@ All APIs are accessed through the gateway at `http://localhost:17000/api/`.
 - **CustomNTP**: Advanced NTP configuration interface
 - **BuildInfo**: Build metadata display
 
-## 🧪 Testing & Development
+## 🧪 Development
 
 ### Development Testing
 
@@ -358,25 +368,25 @@ docker run -d --name brick-hub --restart unless-stopped -p 17002:80 brick-hub
 ### Build Image
 
 ```bash
-./scripts/quick_start.sh docker-build [version]
+./scripts/quick_start.sh build [version]
 ```
 
 **Examples:**
 ```bash
-./scripts/quick_start.sh docker-build                    # Build with default version
-./scripts/quick_start.sh docker-build 1.0.0             # Build with specific version
+./scripts/quick_start.sh build                    # Build with default version
+./scripts/quick_start.sh build 1.0.0             # Build with specific version
 ```
 
 ### Run Container
 
 ```bash
-./scripts/quick_start.sh docker-run [version]
+./scripts/quick_start.sh run [version]
 ```
 
 **Examples:**
 ```bash
-./scripts/quick_start.sh docker-run                     # Run with default version
-./scripts/quick_start.sh docker-run 1.0.0              # Run with specific version
+./scripts/quick_start.sh run                     # Run with default version
+./scripts/quick_start.sh run 1.0.0              # Run with specific version
 ```
 
 ## 🔍 Monitoring & Troubleshooting
@@ -385,10 +395,10 @@ docker run -d --name brick-hub --restart unless-stopped -p 17002:80 brick-hub
 
 ```bash
 # Container status
-./scripts/quick_start.sh docker-stop && ./scripts/quick_start.sh docker-run
+./scripts/quick_start.sh status
 
 # View logs
-docker logs el-brick-hub
+./scripts/quick_start.sh logs
 
 # Test application
 curl http://localhost:17002
@@ -467,4 +477,4 @@ For issues and questions:
 ---
 
 **Version**: 0.1.0-dev  
-**Last Updated**: July 2025 
+**Last Updated**: January 2025 
