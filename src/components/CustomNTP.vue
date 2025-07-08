@@ -247,13 +247,13 @@
                   <span class="action-icon">⚡</span>
                   <span class="action-text">Reset</span>
                 </button>
-                <button @click="showLogs" class="quick-action-btn" title="View Logs">
-                  <span class="action-icon">📋</span>
-                  <span class="action-text">Logs</span>
+                <button @click="openClientsModal" class="quick-action-btn" title="View Connected Clients" :disabled="!serverModeEnabled">
+                  <span class="action-icon">👥</span>
+                  <span class="action-text">Clients</span>
                 </button>
-                <button @click="openAdvancedManagement" class="quick-action-btn" title="Advanced Management">
-                  <span class="action-icon">⚙️</span>
-                  <span class="action-text">Advanced</span>
+                <button @click="openServersModal" class="quick-action-btn" title="Manage NTP Servers">
+                  <span class="action-icon">🗂️</span>
+                  <span class="action-text">Servers</span>
                 </button>
               </div>
             </div>
@@ -275,14 +275,30 @@
       <p>{{ success }}</p>
       <button @click="success = ''" class="close-btn">×</button>
     </div>
+
+    <NTPServerClientsModal
+      v-if="showClientsModal"
+      :serverModeEnabled="serverModeEnabled"
+      @close="showClientsModal = false"
+    />
+    <NTPServersManagerModal
+      v-if="showServersModal"
+      @close="showServersModal = false"
+    />
   </div>
 </template>
 
 <script>
 import { getApiConfig } from '../config/dashboard.js'
+import NTPServerClientsModal from './NTPServerClientsModal.vue'
+import NTPServersManagerModal from './NTPServersManagerModal.vue'
 
 export default {
   name: 'CustomNTP',
+  components: {
+    NTPServerClientsModal,
+    NTPServersManagerModal
+  },
   data() {
     return {
       status: {
@@ -306,7 +322,9 @@ export default {
         version: '0.1.0-dev',
         buildDate: new Date().toISOString(),
         environment: 'development'
-      }
+      },
+      showClientsModal: false,
+      showServersModal: false
     }
   },
   mounted() {
@@ -417,8 +435,7 @@ export default {
     },
 
     openAdvancedManagement() {
-      // This would navigate to advanced management page
-      alert('Advanced management page coming soon!')
+      // This method is no longer needed as modals handle advanced management
     },
 
     async loadStatus() {
@@ -549,6 +566,12 @@ export default {
       }
     },
 
+    openClientsModal() {
+      this.showClientsModal = true
+    },
+    openServersModal() {
+      this.showServersModal = true
+    },
   }
 }
 </script>
