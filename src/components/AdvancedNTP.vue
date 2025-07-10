@@ -74,12 +74,28 @@ const serverMessage = ref('')
 const clients = ref([])
 const loadingClients = ref(false)
 
+// Helper function to get auth headers
+function getAuthHeaders() {
+  const token = localStorage.getItem('jwt_token')
+  if (token) {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+  return {
+    'Content-Type': 'application/json'
+  }
+}
+
 // Fetch servers from API
 async function fetchServers() {
   // TODO: Replace with real API call
   try {
     const config = window.BRICK_CONFIG.api.customNTP
-    const res = await fetch(`${config.baseUrl}${config.endpoints.status}?flags=2`)
+    const res = await fetch(`${config.baseUrl}${config.endpoints.status}?flags=2`, {
+      headers: getAuthHeaders()
+    })
     if (res.ok) {
       const data = await res.json()
       servers.value = (data.sources || []).map(s => ({...s}))
@@ -99,7 +115,7 @@ async function saveServers() {
     const config = window.BRICK_CONFIG.api.customNTP
     const res = await fetch(`${config.baseUrl}/servers`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ servers: servers.value.map(s => s.name) })
     })
     if (res.ok) {
@@ -141,7 +157,10 @@ async function resetToDefault() {
   serverMessage.value = ''
   try {
     const config = window.BRICK_CONFIG.api.customNTP
-    const res = await fetch(`${config.baseUrl}/servers/default`, { method: 'PUT' })
+    const res = await fetch(`${config.baseUrl}/servers/default`, { 
+      method: 'PUT',
+      headers: getAuthHeaders()
+    })
     if (res.ok) {
       serverMessage.value = 'Reset to default servers.'
       await fetchServers()
@@ -158,7 +177,9 @@ async function fetchClients() {
   loadingClients.value = true
   try {
     const config = window.BRICK_CONFIG.api.customNTP
-    const res = await fetch(`${config.baseUrl}${config.endpoints.status}/clients`)
+    const res = await fetch(`${config.baseUrl}${config.endpoints.status}/clients`, {
+      headers: getAuthHeaders()
+    })
     if (res.ok) {
       const data = await res.json()
       clients.value = data.clients || []

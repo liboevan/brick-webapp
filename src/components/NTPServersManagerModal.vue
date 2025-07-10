@@ -131,10 +131,26 @@ const newServer = ref('')
 const saving = ref(false)
 const serverMessage = ref('')
 
+// Helper function to get auth headers
+function getAuthHeaders() {
+  const token = localStorage.getItem('jwt_token')
+  if (token) {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+  return {
+    'Content-Type': 'application/json'
+  }
+}
+
 async function fetchServers() {
   try {
     const config = window.BRICK_CONFIG.api.customNTP
-    const res = await fetch(`${config.baseUrl}${config.endpoints.servers}`)
+    const res = await fetch(`${config.baseUrl}${config.endpoints.servers}`, {
+      headers: getAuthHeaders()
+    })
     if (res.ok) {
       const data = await res.json()
       console.log('fetchServers response:', data)
@@ -166,7 +182,7 @@ async function saveServers() {
     console.log('saveServers payload:', payload)
     const res = await fetch(`${config.baseUrl}${config.endpoints.servers}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     })
     const resText = await res.text()
@@ -207,7 +223,10 @@ async function resetToDefault() {
   serverMessage.value = ''
   try {
     const config = window.BRICK_CONFIG.api.customNTP
-    const res = await fetch(`${config.baseUrl}${config.endpoints.defaultServers}`, { method: 'PUT' })
+    const res = await fetch(`${config.baseUrl}${config.endpoints.defaultServers}`, { 
+      method: 'PUT',
+      headers: getAuthHeaders()
+    })
     if (res.ok) {
       serverMessage.value = 'Reset to default servers successfully!'
       await fetchServers()

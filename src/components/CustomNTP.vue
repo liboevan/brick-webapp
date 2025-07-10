@@ -292,9 +292,11 @@
 import { getApiConfig } from '../config/dashboard.js'
 import NTPServerClientsModal from './NTPServerClientsModal.vue'
 import NTPServersManagerModal from './NTPServersManagerModal.vue'
+import authMixin from '../mixins/auth.js'
 
 export default {
   name: 'CustomNTP',
+  mixins: [authMixin],
   components: {
     NTPServerClientsModal,
     NTPServersManagerModal
@@ -371,7 +373,9 @@ export default {
     async loadVersionInfo() {
       try {
         const config = window.BRICK_CONFIG.api.customNTP
-        const response = await fetch(`${config.baseUrl}${config.endpoints.version}`)
+        const response = await fetch(`${config.baseUrl}${config.endpoints.version}`, {
+          headers: this.getAuthHeaders()
+        })
         if (response.ok) {
           const data = await response.json()
           console.log('Version response:', data)
@@ -393,9 +397,7 @@ export default {
         const config = window.BRICK_CONFIG.api.customNTP
         const response = await fetch(`${config.baseUrl}${config.endpoints.serverMode}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify({ enabled: !this.serverModeEnabled })
         })
         
@@ -444,7 +446,9 @@ export default {
         // Use flag 23 to exclude clients data (1+2+4+16 = 23)
         // 1=tracking, 2=sources, 4=activity, 16=server_mode (excludes 8=clients)
         const config = window.BRICK_CONFIG.api.customNTP
-        const response = await fetch(`${config.baseUrl}${config.endpoints.status}?flags=23`)
+        const response = await fetch(`${config.baseUrl}${config.endpoints.status}?flags=23`, {
+          headers: this.getAuthHeaders()
+        })
         if (response.ok) {
           const data = await response.json()
           // Transform customNTP API response to expected format

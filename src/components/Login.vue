@@ -42,15 +42,18 @@
       </form>
 
       <div class="login-footer">
-        <p>Demo credentials: admin / password</p>
+        <p>Default users: brick-admin / brickadminpass or brick / brickpass</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import authMixin from '../mixins/auth.js'
+
 export default {
   name: 'Login',
+  mixins: [authMixin],
   data() {
     return {
       username: '',
@@ -65,21 +68,17 @@ export default {
       this.error = ''
 
       try {
-        // Simple demo authentication
-        if (this.username === 'admin' && this.password === 'password') {
-          // Store authentication state
-          localStorage.setItem('isAuthenticated', 'true')
-          localStorage.setItem('user', JSON.stringify({
-            username: this.username,
-            role: 'admin'
-          }))
-          
+        // Use the auth mixin's login method
+        const success = await this.login(this.username, this.password)
+        
+        if (success) {
           // Redirect to dashboard
           this.$router.push('/')
         } else {
           this.error = 'Invalid username or password'
         }
       } catch (err) {
+        console.error('Login error:', err)
         this.error = 'Login failed. Please try again.'
       } finally {
         this.loading = false

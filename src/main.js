@@ -18,11 +18,13 @@ const routes = [
   },
   { 
     path: '/ntp', 
-    component: CustomNTP 
+    component: CustomNTP,
+    meta: { requiresAuth: true }
   },
   { 
     path: '/clock', 
-    component: CustomNTP 
+    component: CustomNTP,
+    meta: { requiresAuth: true }
   },
   { 
     path: '/:pathMatch(.*)*', 
@@ -35,9 +37,28 @@ const router = createRouter({
   routes
 })
 
-// Navigation guard - skip authentication for now
+// Navigation guard with authentication
 router.beforeEach((to, from, next) => {
-  // Skip authentication checks - allow direct access
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true' && localStorage.getItem('jwt_token')
+  
+  // Public routes (home page and login)
+  if (to.path === '/' || to.path === '/login') {
+    next()
+    return
+  }
+  
+  // Protected routes require authentication
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/login')
+    return
+  }
+  
+  // If user is authenticated and trying to access login page, redirect to home
+  if (to.path === '/login' && isAuthenticated) {
+    next('/')
+    return
+  }
+  
   next()
 })
 

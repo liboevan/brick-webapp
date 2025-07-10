@@ -136,11 +136,27 @@ const props = defineProps({ serverModeEnabled: Boolean })
 const clients = ref([])
 const loadingClients = ref(false)
 
+// Helper function to get auth headers
+function getAuthHeaders() {
+  const token = localStorage.getItem('jwt_token')
+  if (token) {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+  return {
+    'Content-Type': 'application/json'
+  }
+}
+
 async function fetchClients() {
   loadingClients.value = true
   try {
     const config = window.BRICK_CONFIG.api.customNTP
-    const res = await fetch(`${config.baseUrl}${config.endpoints.status}/clients`)
+    const res = await fetch(`${config.baseUrl}${config.endpoints.status}/clients`, {
+      headers: getAuthHeaders()
+    })
     if (res.ok) {
       const data = await res.json()
       clients.value = data.clients || []
