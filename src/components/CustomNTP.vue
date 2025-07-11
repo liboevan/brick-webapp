@@ -189,6 +189,7 @@
               </div>
               <div class="mode-controls">
                 <button 
+                  v-if="hasPermission('clock/server-mode')"
                   @click="toggleServerMode" 
                   :disabled="loading.serverMode"
                   class="mode-btn"
@@ -196,6 +197,10 @@
                 >
                   <span v-if="loading.serverMode" class="loading-spinner">⏳</span>
                   <span v-else>{{ serverModeEnabled ? 'Disable' : 'Enable' }}</span>
+                </button>
+                <button v-else class="mode-btn" disabled title="Admin only">
+                  <span class="action-icon">🔒</span>
+                  <span class="action-text">Server Mode (Admin)</span>
                 </button>
               </div>
               <div class="mode-info">
@@ -251,9 +256,17 @@
                   <span class="action-icon">👥</span>
                   <span class="action-text">Clients</span>
                 </button>
-                <button @click="openServersModal" class="quick-action-btn" title="Manage NTP Servers">
+                <!-- Servers Manager (Admin only placeholder) -->
+                <button v-if="hasPermission('clock/servers')"
+                  @click="openServersModal" 
+                  class="quick-action-btn" 
+                  title="Manage NTP Servers">
                   <span class="action-icon">🗂️</span>
                   <span class="action-text">Servers</span>
+                </button>
+                <button v-else class="quick-action-btn" disabled title="Admin only">
+                  <span class="action-icon">🔒</span>
+                  <span class="action-text">Servers (Admin)</span>
                 </button>
               </div>
             </div>
