@@ -20,7 +20,7 @@
           </label>
           <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
         </div>
-
+        <AvatarDropdown :isAuthenticated="isAuthenticated" :user="user" @logout="logout" />
       </div>
     </header>
 
@@ -293,13 +293,15 @@ import { getApiConfig } from '../config/dashboard.js'
 import NTPServerClientsModal from './NTPServerClientsModal.vue'
 import NTPServersManagerModal from './NTPServersManagerModal.vue'
 import authMixin from '../mixins/auth.js'
+import AvatarDropdown from './AvatarDropdown.vue'
 
 export default {
   name: 'CustomNTP',
   mixins: [authMixin],
   components: {
     NTPServerClientsModal,
-    NTPServersManagerModal
+    NTPServersManagerModal,
+    AvatarDropdown
   },
   data() {
     return {
@@ -586,7 +588,7 @@ export default {
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  overflow: hidden;
+  /* overflow: visible; */
 }
 
 /* Header Styles */
@@ -594,13 +596,15 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
-  min-height: 40px;
+  padding: 0.25rem 0.75rem;
+  min-height: 28px;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.15);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
   flex-shrink: 0;
+  position: relative;
+  z-index: 11000;
 }
 
 .header-left {
@@ -616,11 +620,11 @@ export default {
 }
 
 .ntp-title {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #2c3e50;
   margin: 0;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .auto-refresh {
@@ -866,16 +870,17 @@ export default {
 /* Main Content - 2x3 Grid Layout */
 .ntp-content {
   display: flex;
-  flex: 1;
-  padding: 0.5rem 1.5rem;
-  overflow: hidden;
+  flex: 1 1 0;
+  padding: 0.4rem 0.75rem;
+  min-height: 0;
+  /* overflow: visible; */
 }
 
 .grid-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 0.75rem;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
   width: 100%;
   height: 100%;
 }
@@ -912,11 +917,11 @@ export default {
 
 .panel-section {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  border-radius: 7px;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(5px);
   flex: 1;
   overflow: hidden;
   display: flex;
@@ -925,12 +930,12 @@ export default {
 
 .section-title {
   color: #2c3e50;
-  font-size: 1.1rem;
-  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
   text-align: center;
-  font-weight: 700;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 0.4rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e0f2e9;
+  padding-bottom: 0.2rem;
 }
 
 .subsection-title {
@@ -967,7 +972,7 @@ export default {
 
 .status-card.primary {
   background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-  border: 2px solid #4CAF50;
+  border: 1px solid #8ee4af;
 }
 
 .status-card.primary.synced {

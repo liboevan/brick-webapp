@@ -72,8 +72,9 @@ export default {
         const success = await this.login(this.username, this.password)
         
         if (success) {
-          // Redirect to dashboard
-          this.$router.push('/')
+          // Redirect to original page if present, else dashboard
+          const redirect = this.$route.query.redirect || '/'
+          this.$router.push(redirect)
         } else {
           this.error = 'Invalid username or password'
         }

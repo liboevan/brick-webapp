@@ -49,7 +49,7 @@ router.beforeEach((to, from, next) => {
   
   // Protected routes require authentication
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
+    next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }
   

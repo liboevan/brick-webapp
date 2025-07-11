@@ -5,13 +5,11 @@
       <div class="header-content">
         <h1 class="dashboard-title">{{ config.title }}</h1>
         <p class="dashboard-subtitle">{{ config.subtitle }}</p>
-        <div class="system-status">
-          <span class="status-indicator" :class="config.system.status"></span>
-          <span class="status-text">{{ config.system.name }} v{{ config.system.version }}</span>
-        </div>
-        <div class="user-info">
-          <span class="user-name">Welcome, Guest</span>
-        </div>
+        <!-- system-status removed for minimal header -->
+        <!-- user-info removed, avatar is now in top right -->
+      </div>
+      <div class="dashboard-avatar">
+        <AvatarDropdown :isAuthenticated="isAuthenticated" :user="user" @logout="logout" />
       </div>
     </header>
 
@@ -50,15 +48,14 @@
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="dashboard-footer">
-      <p>&copy; 2024 Brick System. Built with modular architecture.</p>
-    </footer>
+    <!-- Footer removed for minimal header -->
   </div>
 </template>
 
 <script>
 import { getConfig } from '../config/dashboard.js'
+import AvatarDropdown from './AvatarDropdown.vue'
+import authMixin from '../mixins/auth.js'
 
 export default {
   name: 'Dashboard',
@@ -75,6 +72,10 @@ export default {
   mounted() {
     // Ensure auth state is up to date
     this.checkAuth && this.checkAuth()
+  },
+  mixins: [authMixin],
+  components: {
+    AvatarDropdown
   },
   methods: {
     navigateToFeature(feature) {
@@ -99,7 +100,7 @@ export default {
 
 <style scoped>
 .dashboard {
-  min-height: 100vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -109,8 +110,32 @@ export default {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   padding: 2rem 0;
-  text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  position: relative;
+}
+
+.dashboard-avatar {
+  position: absolute;
+  right: 2rem;
+  top: 2.7rem;
+  z-index: 11000;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(60,60,60,0.13);
+  border: 1.5px solid #e0e0e0;
+  padding: 0.18rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.dashboard-avatar:hover {
+  box-shadow: 0 8px 24px rgba(60,60,60,0.18);
+  border-color: #b2dfdb;
+  background: #f8fafb;
 }
 
 .header-content {
@@ -193,18 +218,21 @@ export default {
 
 /* Main Content */
 .dashboard-main {
-  flex: 1;
+  flex: 1 0 auto;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 0 2rem;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  margin-bottom: 3rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .feature-card {
@@ -276,6 +304,8 @@ export default {
   border-radius: var(--border-radius);
   padding: 2rem;
   backdrop-filter: blur(10px);
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .section-title {
@@ -315,14 +345,7 @@ export default {
   font-size: 1.1rem;
 }
 
-/* Footer */
-.dashboard-footer {
-  background: rgba(0, 0, 0, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.9rem;
-}
+/* dashboard-footer removed */
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -118,8 +118,8 @@ export default {
       this.user = null
       this.jwtToken = null
       
-      // Redirect to login
-      this.$router.push('/login')
+      // Redirect to home
+      this.$router.push('/')
     },
     
     requireAuth() {
