@@ -1,17 +1,8 @@
 <template>
   <div class="custom-ntp">
-    <!-- Unified Header Bar -->
-    <header class="ntp-header">
-      <div class="header-left">
-        <button @click="goToMain" class="brick-logo-btn" title="Back to Main Page">
-          <div class="brick-logo">
-            <img src="/favicon.png" alt="Brick Logo" class="brick-icon-img" />
-            <span class="brick-text">BRICK</span>
-          </div>
-        </button>
-        <h1 class="ntp-title">NTP Time Synchronization</h1>
-      </div>
-      <div class="header-right">
+    <!-- Shared Header -->
+    <SharedHeader title="NTP Time Synchronization">
+      <template #controls>
         <div class="auto-refresh">
           <label class="refresh-toggle">
             <input type="checkbox" v-model="autoRefresh" @change="toggleAutoRefresh">
@@ -20,9 +11,8 @@
           </label>
           <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
         </div>
-        <AvatarDropdown :isAuthenticated="isAuthenticated" :user="user" @logout="logout" />
-      </div>
-    </header>
+      </template>
+    </SharedHeader>
 
     <!-- Main Content - 2x3 Grid Layout -->
     <div class="ntp-content">
@@ -307,6 +297,7 @@ import NTPServerClientsModal from './NTPServerClientsModal.vue'
 import NTPServersManagerModal from './NTPServersManagerModal.vue'
 import authMixin from '../mixins/auth.js'
 import AvatarDropdown from './AvatarDropdown.vue'
+import SharedHeader from './SharedHeader.vue'
 
 export default {
   name: 'CustomNTP',
@@ -314,7 +305,8 @@ export default {
   components: {
     NTPServerClientsModal,
     NTPServersManagerModal,
-    AvatarDropdown
+    AvatarDropdown,
+    SharedHeader
   },
   data() {
     return {
@@ -358,10 +350,6 @@ export default {
     document.removeEventListener('click', this.handleClickOutside)
   },
   methods: {
-    goToMain() {
-      this.$router.push('/')
-    },
-
     showVersionInfo() {
       this.showVersionTooltip = !this.showVersionTooltip
     },
@@ -604,41 +592,7 @@ export default {
   /* overflow: visible; */
 }
 
-/* Header Styles */
-.ntp-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  min-height: 28px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 2px solid rgba(76, 175, 80, 0.4);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 11000;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.ntp-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-  letter-spacing: 0.3px;
-}
+/* Auto Refresh Controls */
 
 .auto-refresh {
   display: flex;
@@ -702,11 +656,6 @@ export default {
   color: #6c757d;
   font-size: 0.8rem;
   font-weight: 500;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
 }
 
 .version-info {

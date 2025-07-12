@@ -20,7 +20,7 @@
     <main class="dashboard-main">
       <div class="features-grid">
         <div 
-          v-for="feature in enabledFeatures" 
+          v-for="feature in allFeatures" 
           :key="feature.id"
           class="feature-card"
           :style="feature.id === 'ntp' ? '--card-color: #388E3C' : `--card-color: ${feature.color}`"
@@ -70,6 +70,30 @@ export default {
   computed: {
     enabledFeatures() {
       return this.config.features.filter(feature => feature.enabled)
+    },
+    
+    // Add admin management feature for super-admin users
+    adminFeatures() {
+      if (!this.isAuthenticated || !this.user || this.user.role !== 'super-admin') {
+        return []
+      }
+      
+      return [
+        {
+          id: 'admin-management',
+          title: 'Admin Management',
+          description: 'Manage users, roles, and permissions',
+          icon: '⚙️',
+          url: '/admin',
+          color: '#ff5722',
+          enabled: true
+        }
+      ]
+    },
+    
+    // Combine regular features with admin features
+    allFeatures() {
+      return [...this.enabledFeatures, ...this.adminFeatures]
     }
   },
   mounted() {

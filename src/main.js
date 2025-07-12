@@ -4,6 +4,7 @@ import App from './App.vue'
 import Dashboard from './components/Dashboard.vue'
 import Login from './components/Login.vue'
 import CustomNTP from './components/CustomNTP.vue'
+import AdminManagement from './components/AdminManagement.vue'
 import authMixin from './mixins/auth.js'
 
 const routes = [
@@ -25,6 +26,11 @@ const routes = [
     path: '/clock', 
     component: CustomNTP,
     meta: { requiresAuth: true }
+  },
+  { 
+    path: '/admin', 
+    component: AdminManagement,
+    meta: { requiresAuth: true, requiresSuperAdmin: true, title: 'Brick - Admin Management' }
   },
   { 
     path: '/:pathMatch(.*)*', 
@@ -58,6 +64,27 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
     next({ path: '/login', query: { redirect: to.fullPath } })
     return
+  }
+  
+  // Super admin routes require super-admin role
+  if (to.meta.requiresSuperAdmin) {
+    const user = localStorage.getItem('user')
+    if (!user) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
+    
+    try {
+      const userData = JSON.parse(user)
+      if (userData.role !== 'super-admin') {
+        next('/')
+        return
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error)
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
   }
   
   // If user is authenticated and trying to access login page, redirect to home
