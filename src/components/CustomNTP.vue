@@ -1,136 +1,105 @@
 <template>
-  <div class="custom-ntp">
-    <!-- Shared Header -->
-    <SharedHeader title="NTP Time Synchronization">
-      <template #controls>
-        <div class="auto-refresh">
-          <label class="refresh-toggle">
-            <input type="checkbox" v-model="autoRefresh" @change="toggleAutoRefresh">
-            <span class="toggle-slider"></span>
-            Auto Refresh
-          </label>
-          <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
-        </div>
-      </template>
-    </SharedHeader>
-
-    <!-- Main Content - 2x3 Grid Layout -->
-    <div class="ntp-content">
-      <!-- Grid Container -->
-      <div class="grid-container">
-        <!-- Area 1: Status Overview -->
-        <div class="grid-area area-1">
-          <div class="panel-section status-overview">
-            <h2 class="section-title">Status Overview</h2>
-            <div class="status-grid">
-              <div class="status-card primary" :class="getSyncStatusClass()">
-                <div class="status-icon">⏰</div>
-                <div class="status-info">
-                  <div class="status-label">Sync Status</div>
-                  <div class="status-value">{{ getSyncStatusText() }}</div>
-                </div>
+  <Layout>
+    <!-- Page Title in Header -->
+    <template #pageTitle>
+      <h1 class="page-title">NTP Time Synchronization</h1>
+    </template>
+    
+    <!-- Page Controls in Header -->
+    <template #pageControls>
+      <div class="auto-refresh">
+        <label class="refresh-toggle">
+          <input type="checkbox" v-model="autoRefresh" @change="toggleAutoRefresh">
+          <span class="toggle-slider"></span>
+          Auto Refresh
+        </label>
+        <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
+      </div>
+    </template>
+    
+    <!-- Main Content -->
+    <div class="custom-ntp">
+      <div class="ntp-content ntp-grid">
+        <!-- 左上：Status Overview -->
+        <div class="status-section compact">
+          <h2 class="section-title">Status Overview</h2>
+          <div class="status-cards">
+            <div class="status-card primary" :class="getSyncStatusClass()">
+              <div class="status-icon">⏰</div>
+              <div class="status-info">
+                <div class="status-label">Sync Status</div>
+                <div class="status-value">{{ getSyncStatusText() }}</div>
               </div>
-              <div class="status-card">
-                <div class="status-icon">📍</div>
-                <div class="status-info">
-                  <div class="status-label">Stratum</div>
-                  <div class="status-value">{{ status.tracking?.Stratum || 'Unknown' }}</div>
-                </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon">📍</div>
+              <div class="status-info">
+                <div class="status-label">Stratum</div>
+                <div class="status-value">{{ status.tracking?.Stratum || 'Unknown' }}</div>
               </div>
-              <div class="status-card">
-                <div class="status-icon">📡</div>
-                <div class="status-info">
-                  <div class="status-label">Active Sources</div>
-                  <div class="status-value">{{ getActiveSourcesCount() }}</div>
-                </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon">📡</div>
+              <div class="status-info">
+                <div class="status-label">Active Sources</div>
+                <div class="status-value">{{ getActiveSourcesCount() }}</div>
               </div>
-              <div class="status-card">
-                <div class="status-icon">⚡</div>
-                <div class="status-info">
-                  <div class="status-label">Frequency</div>
-                  <div class="status-value">{{ status.tracking?.Frequency || 'Unknown' }}</div>
-                </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon">⚡</div>
+              <div class="status-info">
+                <div class="status-label">Frequency</div>
+                <div class="status-value">{{ status.tracking?.Frequency || 'Unknown' }}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Area 2: Tracking Details -->
-        <div class="grid-area area-2">
-          <div class="panel-section tracking-details">
-            <h2 class="section-title">Tracking Details</h2>
-            <div class="tracking-grid">
-              <div class="tracking-item">
-                <span class="tracking-label">Last Offset:</span>
-                <span class="tracking-value">{{ status.tracking['Last offset'] || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">RMS Offset:</span>
-                <span class="tracking-value">{{ status.tracking['RMS offset'] || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">System Time:</span>
-                <span class="tracking-value">{{ status.tracking['System time'] || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">Update Interval:</span>
-                <span class="tracking-value">{{ status.tracking['Update interval'] || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">Root Delay:</span>
-                <span class="tracking-value">{{ status.tracking['Root delay'] || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">Root Dispersion:</span>
-                <span class="tracking-value">{{ status.tracking['Root dispersion'] || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">Skew:</span>
-                <span class="tracking-value">{{ status.tracking?.Skew || 'Unknown' }}</span>
-              </div>
-              <div class="tracking-item">
-                <span class="tracking-label">Leap Status:</span>
-                <span class="tracking-value" :class="getLeapStatusClass()">{{ status.tracking['Leap status'] || 'Unknown' }}</span>
-              </div>
+        <!-- 右上：Tracking Details -->
+        <div class="tracking-section compact">
+          <h2 class="section-title">Tracking Details</h2>
+          <div class="tracking-list">
+            <div class="tracking-item" v-for="(val, key) in trackingDisplayList" :key="key">
+              <span class="tracking-label">{{ key }}:</span>
+              <span class="tracking-value">{{ val }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Area 3: NTP Sources -->
-        <div class="grid-area area-3">
-          <div class="panel-section sources-section">
-            <h2 class="section-title">NTP Sources</h2>
-            <div class="sources-container">
-              <div v-if="status.sources && status.sources.length > 0" class="sources-list">
-                <div v-for="(source, index) in status.sources" :key="index" class="source-item" :class="getSourceStatusClass(source)">
-                  <div class="source-header">
-                    <span class="source-name">{{ source.name }}</span>
-                    <span class="source-status" :class="getSourceStatusClass(source)">{{ getSourceStatusText(source) }}</span>
+        <!-- 左下：NTP Sources -->
+        <div class="sources-section">
+          <h2 class="section-title">NTP Sources</h2>
+          <div class="sources-container">
+            <div v-if="status.sources && status.sources.length > 0" class="sources-list">
+              <div v-for="(source, index) in status.sources" :key="index" class="source-item" :class="getSourceStatusClass(source)">
+                <div class="source-header">
+                  <span class="source-name">{{ source.name }}</span>
+                  <span class="source-status" :class="getSourceStatusClass(source)">{{ getSourceStatusText(source) }}</span>
+                </div>
+                <div class="source-details">
+                  <div class="detail-row">
+                    <span class="detail-label">Stratum:</span>
+                    <span class="detail-value">{{ source.stratum || 'N/A' }}</span>
                   </div>
-                  <div class="source-details">
-                    <div class="detail-row">
-                      <span class="detail-label">Stratum:</span>
-                      <span class="detail-value">{{ source.stratum || 'N/A' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Offset:</span>
-                      <span class="detail-value">{{ source.offset || 'N/A' }}</span>
-                    </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Offset:</span>
+                    <span class="detail-value">{{ source.offset || 'N/A' }}</span>
                   </div>
                 </div>
               </div>
-              <div v-else class="no-sources">
-                <p>No NTP sources configured</p>
-              </div>
+            </div>
+            <div v-else class="no-sources">
+              <p>No NTP sources configured</p>
             </div>
           </div>
         </div>
 
-        <!-- Area 4: Activity Statistics -->
-        <div class="grid-area area-4">
-          <div class="panel-section activity-section">
+        <!-- 右下：Activity + Server Mode + Buttons -->
+        <div class="right-bottom-section">
+          <!-- Activity Statistics -->
+          <div class="activity-section compact">
             <h2 class="section-title">Activity Statistics</h2>
-            <div class="activity-grid">
+            <div class="activity-cards">
               <div class="activity-card success">
                 <div class="activity-icon">✅</div>
                 <div class="activity-info">
@@ -161,124 +130,62 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Area 5: Server Mode -->
-        <div class="grid-area area-5">
-          <div class="panel-section server-mode-section">
-            <h2 class="section-title">Server Mode</h2>
-            <div class="server-mode-content">
-              <div class="mode-status">
-                <div class="status-indicator" :class="{ active: serverModeEnabled }">
-                  <span class="indicator-dot"></span>
-                  <span class="status-text">{{ serverModeEnabled ? 'ON' : 'OFF' }}</span>
+          <!-- Bottom Right Row: Server Mode + Buttons -->
+          <div class="bottom-right-row">
+            <!-- Server Mode -->
+            <div class="server-mode-section compact">
+              <h2 class="section-title">Server Mode</h2>
+              <div class="server-mode-content tight">
+                <div class="mode-status">
+                  <div class="status-indicator" :class="{ active: serverModeEnabled }">
+                    <span class="indicator-dot"></span>
+                    <span class="status-text">{{ serverModeEnabled ? 'ON' : 'OFF' }}</span>
+                  </div>
+                  <div class="mode-description">
+                    {{ serverModeEnabled ? 'Accepting client connections' : 'Not accepting connections' }}
+                  </div>
+                  <div class="port-info">
+                    <span class="port-label">Port:</span>
+                    <span class="port-value" :class="{ disabled: !serverModeEnabled }">123/UDP</span>
+                  </div>
                 </div>
-                <div class="mode-description">
-                  {{ serverModeEnabled ? 'Accepting client connections' : 'Not accepting connections' }}
-                </div>
-              </div>
-              <div class="mode-controls">
-                <button 
-                  v-if="hasPermission('clock/server-mode')"
-                  @click="toggleServerMode" 
-                  :disabled="loading.serverMode"
-                  class="mode-btn"
-                  :class="{ enabled: serverModeEnabled, disabled: !serverModeEnabled }"
-                >
-                  <span v-if="loading.serverMode" class="loading-spinner">⏳</span>
-                  <span v-else>{{ serverModeEnabled ? 'Disable' : 'Enable' }}</span>
-                </button>
-                <button v-else class="mode-btn" disabled title="Admin only">
-                  <span class="action-icon">🔒</span>
-                  <span class="action-text">Server Mode (Admin)</span>
-                </button>
-              </div>
-              <div class="mode-info">
-                <div class="info-item">
-                  <span class="info-label">Port:</span>
-                  <span class="info-value">123/UDP</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Stratum:</span>
-                  <span class="info-value">{{ status.tracking?.Stratum || 'Unknown' }}</span>
+                <div class="mode-controls">
+                  <button 
+                    v-if="hasPermission('clock/server_mode') || isSuperAdmin()"
+                    @click="toggleServerMode" 
+                    :disabled="loading.serverMode"
+                    class="mode-btn"
+                    :class="{ enabled: serverModeEnabled, disabled: !serverModeEnabled }"
+                  >
+                    <span v-if="loading.serverMode" class="loading-spinner">⏳</span>
+                    <span v-else>{{ serverModeEnabled ? 'Disable' : 'Enable' }}</span>
+                  </button>
+                  <button v-else class="mode-btn" disabled title="Admin only">
+                    <span class="action-icon">🔒</span>
+                    <span class="action-text">Server Mode (Admin)</span>
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Area 6: Quick Actions -->
-        <div class="grid-area area-6">
-          <div class="panel-section quick-actions-section">
-            <h2 class="section-title">Quick Actions</h2>
-            <div class="quick-actions-content">
-              <!-- System Info -->
-              <div class="system-info">
-                <div class="info-card">
-                  <div class="info-icon">ℹ️</div>
-                  <div class="info-content">
-                    <div class="info-title">System</div>
-                    <div class="info-details">
-                      <div class="detail-item">
-                        <span class="detail-label">Ver:</span>
-                        <span class="detail-value">v{{ versionInfo.version }}</span>
-                      </div>
-                      <div class="detail-item">
-                        <span class="detail-label">Up:</span>
-                        <span class="detail-value">{{ getUptime() }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quick Actions -->
-              <div class="actions-grid">
-                <button @click="refreshStatus" class="quick-action-btn" title="Refresh Status">
-                  <span class="action-icon">🔄</span>
-                  <span class="action-text">Refresh</span>
-                </button>
-                <button @click="resetConfiguration" class="quick-action-btn" title="Reset Configuration">
-                  <span class="action-icon">⚡</span>
-                  <span class="action-text">Reset</span>
-                </button>
-                <button @click="openClientsModal" class="quick-action-btn" title="View Connected Clients" :disabled="!serverModeEnabled">
-                  <span class="action-icon">👥</span>
-                  <span class="action-text">Clients</span>
-                </button>
-                <!-- Servers Manager (Admin only placeholder) -->
-                <button v-if="hasPermission('clock/servers')"
-                  @click="openServersModal" 
-                  class="quick-action-btn" 
-                  title="Manage NTP Servers">
-                  <span class="action-icon">🗂️</span>
-                  <span class="action-text">Servers</span>
-                </button>
-                <button v-else class="quick-action-btn" disabled title="Admin only">
-                  <span class="action-icon">🔒</span>
-                  <span class="action-text">Servers (Admin)</span>
-                </button>
-              </div>
+            <!-- Action Buttons -->
+            <div class="actions-section">
+              <button @click="openClientsModal" class="quick-action-btn">
+                <span class="action-icon">👥</span>
+                <span class="action-text">View Clients</span>
+              </button>
+              <button @click="openServersModal" class="quick-action-btn">
+                <span class="action-icon">📡</span>
+                <span class="action-text">Server Manager</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Error Messages -->
-    <div v-if="error" class="error-message">
-      <h3>Error</h3>
-      <p>{{ error }}</p>
-      <button @click="error = ''" class="close-btn">×</button>
-    </div>
-
-    <!-- Success Messages -->
-    <div v-if="success" class="success-message">
-      <h3>Success</h3>
-      <p>{{ success }}</p>
-      <button @click="success = ''" class="close-btn">×</button>
-    </div>
-
+    <!-- Modals -->
     <NTPServerClientsModal
       v-if="showClientsModal"
       :serverModeEnabled="serverModeEnabled"
@@ -288,7 +195,7 @@
       v-if="showServersModal"
       @close="showServersModal = false"
     />
-  </div>
+  </Layout>
 </template>
 
 <script>
@@ -296,8 +203,7 @@ import { getApiConfig } from '../config/dashboard.js'
 import NTPServerClientsModal from './NTPServerClientsModal.vue'
 import NTPServersManagerModal from './NTPServersManagerModal.vue'
 import authMixin from '../mixins/auth.js'
-import AvatarDropdown from './AvatarDropdown.vue'
-import SharedHeader from './SharedHeader.vue'
+import Layout from './Layout.vue'
 
 export default {
   name: 'CustomNTP',
@@ -305,8 +211,7 @@ export default {
   components: {
     NTPServerClientsModal,
     NTPServersManagerModal,
-    AvatarDropdown,
-    SharedHeader
+    Layout
   },
   data() {
     return {
@@ -334,6 +239,22 @@ export default {
       },
       showClientsModal: false,
       showServersModal: false
+    }
+  },
+  computed: {
+    trackingDisplayList() {
+      // 只显示常用的几个字段，顺序可调整
+      const t = this.status.tracking || {};
+      return {
+        'Last Offset': t['Last offset'] || 'Unknown',
+        'RMS Offset': t['RMS offset'] || 'Unknown',
+        'System Time': t['System time'] || 'Unknown',
+        'Update Interval': t['Update interval'] || 'Unknown',
+        'Root Delay': t['Root delay'] || 'Unknown',
+        'Root Dispersion': t['Root dispersion'] || 'Unknown',
+        'Skew': t['Skew'] || 'Unknown',
+        'Leap Status': t['Leap status'] || 'Unknown',
+      }
     }
   },
   mounted() {
@@ -573,50 +494,78 @@ export default {
       }
     },
 
-    openClientsModal() {
-      this.showClientsModal = true
+    formatDate(dateString) {
+      if (!dateString) return 'Unknown'
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     },
+
     openServersModal() {
       this.showServersModal = true
     },
+
+    openClientsModal() {
+      this.showClientsModal = true
+    }
   }
 }
 </script>
 
 <style scoped>
 .custom-ntp {
-  height: 100vh;
+  height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  /* overflow: visible; */
+  background: #f5f5f5;
+}
+
+/* Page Title Styles */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  margin: 0;
 }
 
 /* Auto Refresh Controls */
-
 .auto-refresh {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  margin-left: auto;
+  padding-right: 1rem;
+  min-height: 1.5rem;
+  justify-content: center;
 }
 
 .refresh-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #34495e;
-  font-size: 0.85rem;
+  color: #4CAF50;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
   cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
   transition: all 0.3s ease;
-  font-weight: 500;
+  border: none;
 }
 
 .refresh-toggle:hover {
-  background: #e9ecef;
+  background: rgba(76, 175, 80, 0.2);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 .refresh-toggle input[type="checkbox"] {
@@ -624,10 +573,10 @@ export default {
 }
 
 .toggle-slider {
-  width: 36px;
-  height: 18px;
+  width: 24px;
+  height: 12px;
   background: #dee2e6;
-  border-radius: 9px;
+  border-radius: 6px;
   position: relative;
   transition: background 0.3s ease;
 }
@@ -635,12 +584,12 @@ export default {
 .toggle-slider:before {
   content: '';
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   background: white;
   border-radius: 50%;
-  top: 3px;
-  left: 3px;
+  top: 2px;
+  left: 2px;
   transition: transform 0.3s ease;
 }
 
@@ -649,488 +598,158 @@ export default {
 }
 
 .refresh-toggle input:checked + .toggle-slider:before {
-  transform: translateX(18px);
+  transform: translateX(12px);
 }
 
 .last-update {
   color: #6c757d;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.version-info {
-  position: relative;
-}
-
-.version-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.version-btn:hover {
-  background: rgba(76, 175, 80, 0.1);
-  transform: scale(1.05);
-}
-
-.version-icon {
-  font-size: 1.2rem;
-  color: #2c3e50;
-  transition: color 0.3s ease;
-}
-
-.version-btn:hover .version-icon {
-  color: #4CAF50;
-}
-
-.version-tooltip {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 1000;
-  min-width: 250px;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.tooltip-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.tooltip-title {
-  font-weight: 700;
-  color: #2c3e50;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.tooltip-icon {
-  font-size: 1rem;
-}
-
-.tooltip-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.tooltip-label {
-  color: #6c757d;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.tooltip-value {
-  color: #2c3e50;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-}
-
-.version-number {
-  color: #4CAF50;
-  background: rgba(76, 175, 80, 0.1);
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
   font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.environment-tag {
-  color: #FF9800;
-  background: rgba(255, 152, 0, 0.1);
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-.brick-logo-btn {
-  background: none;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.brick-logo-btn:hover {
-  background: rgba(76, 175, 80, 0.1);
-  transform: scale(1.05);
-  border: none;
-  outline: none;
-}
-
-.brick-logo-btn:focus {
-  border: none;
-  outline: none;
-  box-shadow: none;
-}
-
-.brick-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.2rem;
-  background: #4CAF50;
-  border-radius: 4px;
-  outline: none;
-}
-
-.brick-icon {
-  font-size: 1.2rem;
-}
-
-.brick-icon-img {
-  width: 1.2rem;
-  height: 1.2rem;
-  object-fit: contain;
-}
-
-.brick-text {
-  color: white;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 1px;
-}
-
-.brick-logo:hover,
-.brick-logo:focus {
-  border: none;
-  outline: none;
-}
-
-/* Main Content - 2x3 Grid Layout */
+/* Main Content Styles */
 .ntp-content {
-  display: flex;
-  flex: 1 1 0;
-  padding: 0.4rem 0.75rem;
-  min-height: 0;
-  /* overflow: visible; */
+  flex: 1;
+  padding: 0.75rem;
+  overflow: hidden;
 }
 
-.grid-container {
+.ntp-content.ntp-grid {
+  flex: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 0.4rem;
-  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 2fr 3fr;
+  gap: 0.5rem;
   height: 100%;
 }
 
-.grid-area {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+.status-section.compact,
+.tracking-section.compact {
+  min-height: 50px;
+  padding: 0.4rem 0.4rem 0.2rem 0.4rem;
 }
 
-.area-1 {
-  grid-area: 1 / 1 / 2 / 2;
-}
-
-.area-2 {
-  grid-area: 1 / 2 / 2 / 3;
-}
-
-.area-3 {
-  grid-area: 1 / 3 / 2 / 4;
-}
-
-.area-4 {
-  grid-area: 2 / 1 / 3 / 2;
-}
-
-.area-5 {
-  grid-area: 2 / 2 / 3 / 3;
-}
-
-.area-6 {
-  grid-area: 2 / 3 / 3 / 4;
-}
-
-.panel-section {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 7px;
-  padding: 0.25rem 0.5rem;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(5px);
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.section-title {
-  color: #2c3e50;
-  font-size: 0.95rem;
-  margin-bottom: 0.4rem;
-  text-align: center;
-  font-weight: 600;
-  border-bottom: 1px solid #e0f2e9;
-  padding-bottom: 0.2rem;
-}
-
-.subsection-title {
-  color: #495057;
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-}
-
-/* Status Overview */
-.status-grid {
+.status-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-  flex: 1;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0.3rem;
+  height: 100%;
+  padding: 0.2rem;
 }
 
 .status-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  padding: 0.4rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 0.4rem;
+  border: 1px solid #e9ecef;
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  min-height: 0;
 }
 
 .status-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .status-card.primary {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-  border: 1px solid #8ee4af;
-}
-
-.status-card.primary.synced {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-  border-color: #4CAF50;
-}
-
-.status-card.primary.not-synced {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  border-color: #f44336;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
 }
 
 .status-icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
 }
 
 .status-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex: 1;
 }
 
 .status-label {
-  color: #6c757d;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-bottom: 0.1rem;
 }
 
 .status-value {
-  color: #2c3e50;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-/* Tracking Details */
-.tracking-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-  flex: 1;
-  overflow-y: auto;
-}
-
-.tracking-item {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
-}
-
-.tracking-label {
-  color: #6c757d;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
-.tracking-value {
-  color: #2c3e50;
-  font-size: 0.75rem;
-  font-weight: 700;
+/* Tracking Details Styles */
+.tracking-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  flex: 1;
 }
 
-/* Future Features Section */
-.future-content {
+.tracking-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100%;
+  align-items: center;
+  padding: 0.4rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
   text-align: center;
-  padding: 1rem;
 }
 
-.future-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.7;
-}
-
-.future-text h3 {
-  color: #2c3e50;
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.future-text p {
+.tracking-label {
+  font-weight: 500;
   color: #6c757d;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
 }
 
-.future-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  text-align: left;
+.tracking-value {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
 }
 
-.future-features li {
-  color: #495057;
-  font-size: 0.75rem;
-  margin-bottom: 0.3rem;
-  padding-left: 1rem;
-  position: relative;
-}
-
-.future-features li:before {
-  content: '•';
-  color: #4CAF50;
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-}
-
-/* Sources Section */
+/* Sources Section Styles */
 .sources-container {
   flex: 1;
   overflow: hidden;
+  max-height: none;
 }
 
 .sources-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  height: 100%;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-  max-height: calc(100% - 2rem);
-}
-
-.sources-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sources-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-.sources-list::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.sources-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  gap: 0.2rem;
 }
 
 .source-item {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  padding: 0.3rem;
   border: 1px solid #e9ecef;
-  min-height: 60px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  transition: all 0.3s ease;
+  margin-bottom: 0.08rem;
 }
 
 .source-item:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.source-item.current {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+.source-item.synced {
   border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
 }
 
-.source-item.selected {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  border-color: #2196F3;
-}
-
-.source-item.candidate {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border-color: #FF9800;
-}
-
-.source-item.rejected {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+.source-item.unsynced {
   border-color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
 }
 
 .source-header {
@@ -1141,516 +760,151 @@ export default {
 }
 
 .source-name {
+  font-weight: 600;
   color: #2c3e50;
-  font-weight: 700;
-  font-size: 0.85rem;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.9rem;
 }
 
 .source-status {
-  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
   border-radius: 12px;
-  font-size: 0.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  flex-shrink: 0;
 }
 
-.source-status.current {
-  background: #4CAF50;
-  color: white;
+.source-status.synced {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
 }
 
-.source-status.selected {
-  background: #2196F3;
-  color: white;
-}
-
-.source-status.candidate {
-  background: #FF9800;
-  color: white;
-}
-
-.source-status.rejected {
-  background: #f44336;
-  color: white;
-}
-
-.source-status.unknown {
-  background: #9E9E9E;
-  color: white;
+.source-status.unsynced {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
 }
 
 .source-details {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  font-size: 0.8rem;
 }
 
 .detail-label {
   color: #6c757d;
-  font-size: 0.7rem;
-  font-weight: 600;
 }
 
 .detail-value {
+  font-weight: 500;
   color: #2c3e50;
-  font-size: 0.7rem;
-  font-weight: 700;
 }
 
-/* Activity Statistics */
-.activity-grid {
+.no-sources {
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem;
+}
+
+/* Activity Statistics Styles */
+.activity-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-  flex: 1;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0.3rem;
+  height: 100%;
+  padding: 0.2rem;
 }
 
 .activity-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  padding: 0.75rem;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid #e9ecef;
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  min-height: 0;
 }
 
 .activity-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .activity-card.success {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
   border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
 }
 
 .activity-card.error {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
   border-color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
 }
 
 .activity-card.warning {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border-color: #FF9800;
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
 }
 
 .activity-card.timeout {
-  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-  border-color: #9C27B0;
+  border-color: #9c27b0;
+  background: rgba(156, 39, 176, 0.1);
 }
 
 .activity-icon {
-  font-size: 1.5rem;
-  display: block;
-  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .activity-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex: 1;
 }
 
 .activity-label {
-  color: #6c757d;
   font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-bottom: 0.1rem;
 }
 
 .activity-value {
-  color: #2c3e50;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-/* Server Management */
-.servers-section {
-  margin-bottom: 1.5rem;
-}
-
-.servers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.server-item {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 0.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
-  transition: all 0.3s ease;
-}
-
-.server-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.server-name {
-  color: #2c3e50;
+  font-size: 0.9rem;
   font-weight: 600;
-  font-size: 0.8rem;
 }
 
-.server-status {
-  padding: 0.2rem 0.6rem;
-  border-radius: 15px;
-  font-size: 0.55rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.server-status.current {
-  background: #4CAF50;
-  color: white;
-}
-
-.server-status.selected {
-  background: #2196F3;
-  color: white;
-}
-
-.server-status.candidate {
-  background: #FF9800;
-  color: white;
-}
-
-.server-status.rejected {
-  background: #f44336;
-  color: white;
-}
-
-.server-status.unknown {
-  background: #9E9E9E;
-  color: white;
-}
-
-/* Form Styles */
-.add-servers-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #2c3e50;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.8rem;
-  resize: vertical;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
-  transition: all 0.3s ease;
-}
-
-.form-textarea:focus {
-  outline: none;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
-  border-color: #4CAF50;
-}
-
-.form-textarea::placeholder {
-  color: #adb5bd;
-}
-
-.form-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  padding: 0.6rem 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.75rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  flex: 1;
-  justify-content: center;
-}
-
-.action-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
-}
-
-.action-btn.primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #45a049, #388E3C);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-}
-
-.action-btn.secondary {
-  background: linear-gradient(135deg, #6c757d, #5a6268);
-  color: white;
-}
-
-.action-btn.secondary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5a6268, #495057);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-}
-
-.action-btn.danger {
-  background: linear-gradient(135deg, #f44336, #d32f2f);
-  color: white;
-}
-
-.action-btn.danger:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d32f2f, #c62828);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-}
-
-/* Messages */
-.error-message,
-.success-message {
-  position: fixed;
-  top: 80px;
-  right: 20px;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  max-width: 400px;
-  z-index: 1000;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  border: 2px solid;
-  backdrop-filter: blur(10px);
-}
-
-.error-message {
-  background: rgba(244, 67, 54, 0.95);
-  color: #ffffff;
-  border-color: #d32f2f;
-}
-
-.success-message {
-  background: rgba(76, 175, 80, 0.95);
-  color: #ffffff;
-  border-color: #4CAF50;
-}
-
-.error-message h3,
-.success-message h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.error-message p,
-.success-message p {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0;
-  margin-left: auto;
-  opacity: 0.7;
-  font-weight: bold;
-  transition: opacity 0.3s ease;
-}
-
-.close-btn:hover {
-  opacity: 1;
-}
-
-.loading-spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.no-servers,
-.no-sources {
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
-  padding: 1rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px dashed #dee2e6;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .grid-container {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-  }
-  
-  .area-1 {
-    grid-area: 1 / 1 / 2 / 2;
-  }
-  
-  .area-2 {
-    grid-area: 1 / 2 / 2 / 3;
-  }
-  
-  .area-3 {
-    grid-area: 2 / 1 / 3 / 2;
-  }
-  
-  .area-4 {
-    grid-area: 2 / 2 / 3 / 3;
-  }
-  
-  .area-5 {
-    grid-area: 3 / 1 / 4 / 2;
-  }
-  
-  .area-6 {
-    grid-area: 3 / 2 / 4 / 3;
-  }
-}
-
-@media (max-width: 768px) {
-  .ntp-header {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-  }
-  
-  .header-left {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .header-right {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .ntp-title {
-    font-size: 1.5rem;
-  }
-  
-  .auto-refresh {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .ntp-content {
-    padding: 1rem;
-  }
-  
-  .grid-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(6, auto);
-  }
-  
-  .area-1,
-  .area-2,
-  .area-3,
-  .area-4,
-  .area-5,
-  .area-6 {
-    grid-area: auto;
-  }
-  
-  .status-grid,
-  .activity-grid,
-  .tracking-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-  
-  .action-btn {
-    justify-content: center;
-  }
-}
-
-/* Area 5: Server Mode Styles */
-.server-mode-section {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
+/* Server Mode Styles */
 .server-mode-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 0.75rem;
+  gap: 0.3rem;
+  height: 100%;
 }
 
 .mode-status {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
+  padding: 0.15rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.2rem;
+  margin-bottom: 0.2rem;
 }
 
 .indicator-dot {
-  width: 12px;
-  height: 12px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #f44336;
   transition: background 0.3s ease;
@@ -1661,33 +915,55 @@ export default {
 }
 
 .status-text {
-  font-size: 1.1rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #333;
 }
 
 .mode-description {
   color: #666;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.65rem;
+  line-height: 1.1;
+  margin-bottom: 0.2rem;
+}
+
+.port-info {
+  margin-top: 0.2rem;
+  font-size: 0.65rem;
+  color: #666;
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.port-label {
+  font-weight: 500;
+}
+
+.port-value {
+  font-weight: 600;
+  color: #333;
 }
 
 .mode-controls {
   display: flex;
   justify-content: center;
+  margin-bottom: 0.2rem;
+  flex: 0 0 auto;
 }
 
 .mode-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.2rem 0.5rem;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.2rem;
+  min-height: 20px;
 }
 
 .mode-btn:disabled {
@@ -1713,111 +989,20 @@ export default {
   background: #388E3C;
 }
 
-.mode-info {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.info-item:last-child {
-  border-bottom: none;
-}
-
-.info-label {
-  font-weight: 500;
-  color: #666;
-}
-
-.info-value {
-  font-weight: 600;
-  color: #333;
-}
-
-/* Area 6: Quick Actions Styles */
-.quick-actions-section {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.quick-actions-content {
+.actions-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.75rem;
-}
-
-.system-info {
-  margin-bottom: 1rem;
-}
-
-.info-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.info-icon {
-  font-size: 1.5rem;
-}
-
-.info-content {
-  flex: 1;
-}
-
-.info-title {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.info-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-}
-
-.detail-label {
-  color: #666;
-}
-
-.detail-value {
-  font-weight: 500;
-  color: #333;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  align-items: stretch;
+  justify-content: center;
 }
 
 .quick-action-btn {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 0.75rem;
+  border-radius: 8px;
+  padding: 1.2rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -1826,6 +1011,9 @@ export default {
   gap: 0.5rem;
   text-decoration: none;
   color: inherit;
+  min-height: 80px;
+  justify-content: center;
+  flex: 1;
 }
 
 .quick-action-btn:hover {
@@ -1843,5 +1031,209 @@ export default {
   font-size: 0.8rem;
   font-weight: 500;
   color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .top-row, .bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-row, .bottom-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .tracking-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .activity-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .actions-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sources-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.right-bottom-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 0;
+}
+
+.activity-section.compact {
+  min-height: 0;
+  padding: 0.4rem 0.4rem 0.2rem 0.4rem;
+  flex: 0.4;
+}
+
+.bottom-right-row {
+  display: flex;
+  gap: 0.4rem;
+  flex: 0.6;
+  min-height: 0;
+}
+
+.server-mode-section.compact {
+  flex: 1;
+  min-height: 0;
+  padding: 0.4rem 0.4rem 0.2rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.server-mode-content.tight {
+  padding: 0.8rem 0 0 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.mode-status {
+  text-align: center;
+  padding: 0.2rem;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f44336;
+  transition: background 0.3s ease;
+}
+
+.status-indicator.active .indicator-dot {
+  background: #4CAF50;
+}
+
+.status-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.mode-description {
+  color: #666;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+
+.port-info {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.port-label {
+  font-weight: 500;
+}
+
+.port-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.port-value.disabled {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.mode-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.8rem;
+  flex: 0 0 auto;
+}
+
+.mode-btn {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 28px;
+}
+
+.mode-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mode-btn.enabled {
+  background: #f44336;
+  color: white;
+}
+
+.mode-btn.enabled:hover:not(:disabled) {
+  background: #d32f2f;
+}
+
+.mode-btn.disabled {
+  background: #4CAF50;
+  color: white;
+}
+
+.mode-btn.disabled:hover:not(:disabled) {
+  background: #388E3C;
+}
+
+.status-section, .tracking-section, .sources-section, .activity-section, .server-mode-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.3rem;
 }
 </style> 

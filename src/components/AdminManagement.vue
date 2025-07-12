@@ -1,229 +1,224 @@
 <template>
-  <div class="admin-management">
-    <!-- Shared Header -->
-    <SharedHeader title="Admin Management">
-      <template #controls>
-        <div class="admin-info">
-          <span class="admin-role">Super Administrator</span>
-          <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
-        </div>
-      </template>
-    </SharedHeader>
-
+  <Layout>
+    <!-- Page Title in Header -->
+    <template #pageTitle>
+      <h1 class="page-title">Admin Management</h1>
+    </template>
+    
+    <!-- Page Controls in Header -->
+    <template #pageControls>
+      <div class="admin-info">
+        <span class="admin-role">Super Administrator</span>
+        <span class="last-update">Last updated: {{ lastUpdateTime }}</span>
+      </div>
+    </template>
+    
     <!-- Main Content -->
-    <main class="admin-main">
-      <!-- Navigation Tabs -->
-      <div class="admin-tabs">
-        <button 
-          v-for="tab in tabs" 
-          :key="tab.id"
-          :class="['tab-btn', { active: activeTab === tab.id }]"
-          @click="activeTab = tab.id"
-        >
-          <span class="tab-icon">{{ tab.icon }}</span>
-          <span class="tab-label">{{ tab.label }}</span>
-        </button>
-      </div>
-
-      <!-- Tab Content -->
-      <div class="tab-content">
-        <!-- Users Tab -->
-        <div v-if="activeTab === 'users'" class="tab-panel">
-          <div class="panel-header">
-            <h2>User Management</h2>
-            <button class="add-btn" @click="showUserModal = true">
-              <span class="btn-icon">➕</span>
-              Add User
-            </button>
-          </div>
-          
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="user in users" :key="user.id">
-                  <td>{{ user.username }}</td>
-                  <td>{{ user.email || '-' }}</td>
-                  <td>{{ user.first_name }} {{ user.last_name }}</td>
-                  <td>
-                    <span :class="['role-badge', `role-${user.role}`]">
-                      {{ user.role }}
-                    </span>
-                  </td>
-                  <td>
-                    <span :class="['status-badge', user.is_active ? 'active' : 'inactive']">
-                      {{ user.is_active ? 'Active' : 'Inactive' }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="action-btn edit" @click="editUser(user)">
-                        ✏️
-                      </button>
-                      <button class="action-btn delete" @click="deleteUser(user)" v-if="user.role !== 'super-admin'">
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <div class="admin-management">
+      <!-- Main Content -->
+      <div class="admin-main">
+        <!-- Navigation Tabs -->
+        <div class="admin-tabs">
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.id"
+            :class="['tab-btn', { active: activeTab === tab.id }]"
+            @click="activeTab = tab.id"
+          >
+            <span class="tab-icon">{{ tab.icon }}</span>
+            <span class="tab-label">{{ tab.label }}</span>
+          </button>
         </div>
 
-        <!-- Roles Tab -->
-        <div v-if="activeTab === 'roles'" class="tab-panel">
-          <div class="panel-header">
-            <h2>Role Management</h2>
-            <button class="add-btn" @click="showRoleModal = true">
-              <span class="btn-icon">➕</span>
-              Add Role
-            </button>
-          </div>
-          
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Role Name</th>
-                  <th>Description</th>
-                  <th>Permissions</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="role in roles" :key="role.id">
-                  <td>{{ role.name }}</td>
-                  <td>{{ role.description || '-' }}</td>
-                  <td>
-                    <div class="permissions-list">
-                      <span v-for="perm in role.permissions" :key="perm.id" class="permission-tag">
-                        {{ perm.name }}
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Users Tab -->
+          <div v-if="activeTab === 'users'" class="tab-panel">
+            <div class="panel-header">
+              <h2>User Management</h2>
+              <button @click="showUserModal = true" class="add-btn">
+                <span class="btn-icon">➕</span>
+                Add User
+              </button>
+            </div>
+            
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="user in users" :key="user.id">
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email || 'N/A' }}</td>
+                    <td>
+                      <span class="role-tag" :class="user.role">{{ user.role }}</span>
+                    </td>
+                    <td>
+                      <span class="status-badge" :class="{ active: user.is_active }">
+                        {{ user.is_active ? 'Active' : 'Inactive' }}
                       </span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="action-btn edit" @click="editRole(role)" v-if="!isDefaultRole(role.name)">
-                        ✏️
-                      </button>
-                      <button class="action-btn delete" @click="deleteRole(role)" v-if="!isDefaultRole(role.name)">
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button @click="editUser(user)" class="action-btn edit">Edit</button>
+                        <button @click="deleteUser(user)" class="action-btn delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        <!-- Permissions Tab -->
-        <div v-if="activeTab === 'permissions'" class="tab-panel">
-          <div class="panel-header">
-            <h2>Permission Management</h2>
-            <button class="add-btn" @click="showPermissionModal = true">
-              <span class="btn-icon">➕</span>
-              Add Permission
-            </button>
+          <!-- Roles Tab -->
+          <div v-if="activeTab === 'roles'" class="tab-panel">
+            <div class="panel-header">
+              <h2>Role Management</h2>
+              <button @click="showRoleModal = true" class="add-btn">
+                <span class="btn-icon">➕</span>
+                Add Role
+              </button>
+            </div>
+            
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Role Name</th>
+                    <th>Description</th>
+                    <th>Permissions</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="role in roles" :key="role.id">
+                    <td>{{ role.name }}</td>
+                    <td>{{ role.description || 'No description' }}</td>
+                    <td>
+                      <div class="permissions-list">
+                        <span v-for="perm in role.permissions.slice(0, 3)" :key="perm.id" class="permission-tag">
+                          {{ perm.name }}
+                        </span>
+                        <span v-if="role.permissions.length > 3" class="more-permissions">
+                          +{{ role.permissions.length - 3 }} more
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="role-type" :class="{ system: isDefaultRole(role.name) }">
+                        {{ isDefaultRole(role.name) ? 'System' : 'Custom' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button @click="editRole(role)" class="action-btn edit">Edit</button>
+                        <button 
+                          v-if="!isDefaultRole(role.name)"
+                          @click="deleteRole(role)" 
+                          class="action-btn delete"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Permission Name</th>
-                  <th>Description</th>
-                  <th>Resource</th>
-                  <th>Action</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="permission in permissions" :key="permission.id">
-                  <td>{{ permission.name }}</td>
-                  <td>{{ permission.description || '-' }}</td>
-                  <td>{{ permission.resource }}</td>
-                  <td>{{ permission.action }}</td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="action-btn edit" @click="editPermission(permission)">
-                        ✏️
-                      </button>
-                      <button class="action-btn delete" @click="deletePermission(permission)">
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <!-- Permissions Tab -->
+          <div v-if="activeTab === 'permissions'" class="tab-panel">
+            <div class="panel-header">
+              <h2>Permission Management</h2>
+              <button @click="showPermissionModal = true" class="add-btn">
+                <span class="btn-icon">➕</span>
+                Add Permission
+              </button>
+            </div>
+            
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Permission Name</th>
+                    <th>Description</th>
+                    <th>Resource</th>
+                    <th>Action</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="permission in permissions" :key="permission.id">
+                    <td>{{ permission.name }}</td>
+                    <td>{{ permission.description || 'No description' }}</td>
+                    <td>{{ permission.resource }}</td>
+                    <td>{{ permission.action }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button @click="editPermission(permission)" class="action-btn edit">Edit</button>
+                        <button @click="deletePermission(permission)" class="action-btn delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
 
-    <!-- Modals -->
     <!-- User Modal -->
     <div v-if="showUserModal" class="modal-overlay" @click="showUserModal = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3>{{ editingUser ? 'Edit User' : 'Add User' }}</h3>
-          <button class="close-btn" @click="showUserModal = false">×</button>
+          <button @click="showUserModal = false" class="close-btn">×</button>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveUser">
-            <div class="form-group">
-              <label>Username</label>
-              <input v-model="userForm.username" type="text" required :disabled="editingUser">
-            </div>
-            <div class="form-group" v-if="!editingUser">
-              <label>Password</label>
-              <input v-model="userForm.password" type="password" required>
-            </div>
+        <form @submit.prevent="saveUser" class="modal-body">
+          <div class="form-group">
+            <label>Username</label>
+            <input v-model="userForm.username" type="text" required :disabled="editingUser">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input v-model="userForm.password" type="password" :required="!editingUser">
+          </div>
+          <div class="form-row">
             <div class="form-group">
               <label>Email</label>
               <input v-model="userForm.email" type="email">
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>First Name</label>
-                <input v-model="userForm.first_name" type="text">
-              </div>
-              <div class="form-group">
-                <label>Last Name</label>
-                <input v-model="userForm.last_name" type="text">
-              </div>
-            </div>
             <div class="form-group">
               <label>Role</label>
               <select v-model="userForm.role_id" required>
+                <option value="">Select Role</option>
                 <option v-for="role in roles" :key="role.id" :value="role.id">
                   {{ role.name }}
                 </option>
               </select>
             </div>
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input v-model="userForm.is_active" type="checkbox">
-                Active
-              </label>
-            </div>
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="showUserModal = false">Cancel</button>
-              <button type="submit" class="btn-primary">Save</button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input v-model="userForm.is_active" type="checkbox">
+              Active
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" @click="showUserModal = false">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -232,37 +227,35 @@
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3>{{ editingRole ? 'Edit Role' : 'Add Role' }}</h3>
-          <button class="close-btn" @click="showRoleModal = false">×</button>
+          <button @click="showRoleModal = false" class="close-btn">×</button>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveRole">
-            <div class="form-group">
-              <label>Role Name</label>
-              <input v-model="roleForm.name" type="text" required :disabled="editingRole && isDefaultRole(editingRole.name)">
+        <form @submit.prevent="saveRole" class="modal-body">
+          <div class="form-group">
+            <label>Role Name</label>
+            <input v-model="roleForm.name" type="text" required>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea v-model="roleForm.description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Permissions</label>
+            <div class="permissions-selector">
+              <label v-for="permission in permissions" :key="permission.id" class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  :value="permission.id" 
+                  v-model="roleForm.permissions"
+                >
+                {{ permission.name }} - {{ permission.description }}
+              </label>
             </div>
-            <div class="form-group">
-              <label>Description</label>
-              <textarea v-model="roleForm.description" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-              <label>Permissions</label>
-              <div class="permissions-selector">
-                <label v-for="perm in permissions" :key="perm.id" class="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    :value="perm.id" 
-                    v-model="roleForm.permissions"
-                  >
-                  {{ perm.name }} - {{ perm.description }}
-                </label>
-              </div>
-            </div>
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="showRoleModal = false">Cancel</button>
-              <button type="submit" class="btn-primary">Save</button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" @click="showRoleModal = false">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -271,43 +264,40 @@
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3>{{ editingPermission ? 'Edit Permission' : 'Add Permission' }}</h3>
-          <button class="close-btn" @click="showPermissionModal = false">×</button>
+          <button @click="showPermissionModal = false" class="close-btn">×</button>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="savePermission">
+        <form @submit.prevent="savePermission" class="modal-body">
+          <div class="form-group">
+            <label>Permission Name</label>
+            <input v-model="permissionForm.name" type="text" required>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea v-model="permissionForm.description" rows="3"></textarea>
+          </div>
+          <div class="form-row">
             <div class="form-group">
-              <label>Permission Name</label>
-              <input v-model="permissionForm.name" type="text" required>
+              <label>Resource</label>
+              <input v-model="permissionForm.resource" type="text" required>
             </div>
             <div class="form-group">
-              <label>Description</label>
-              <textarea v-model="permissionForm.description" rows="3"></textarea>
+              <label>Action</label>
+              <input v-model="permissionForm.action" type="text" required>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Resource</label>
-                <input v-model="permissionForm.resource" type="text" required>
-              </div>
-              <div class="form-group">
-                <label>Action</label>
-                <input v-model="permissionForm.action" type="text" required>
-              </div>
-            </div>
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="showPermissionModal = false">Cancel</button>
-              <button type="submit" class="btn-primary">Save</button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" @click="showPermissionModal = false">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
+  </Layout>
 </template>
 
 <script>
-import AvatarDropdown from './AvatarDropdown.vue'
-import SharedHeader from './SharedHeader.vue'
 import authMixin from '../mixins/auth.js'
+import Layout from './Layout.vue'
 
 export default {
   name: 'AdminManagement',
@@ -363,8 +353,7 @@ export default {
   mixins: [authMixin],
   
   components: {
-    AvatarDropdown,
-    SharedHeader
+    Layout
   },
   
   async mounted() {
@@ -668,7 +657,15 @@ export default {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f5f5f5;
+}
+
+/* Page Title Styles */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  margin: 0;
 }
 
 /* Admin Info Styles */
@@ -677,6 +674,10 @@ export default {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.25rem;
+  margin-left: auto;
+  padding-right: 1rem;
+  min-height: 1.5rem;
+  justify-content: center;
 }
 
 .admin-role {
@@ -685,12 +686,16 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
 }
 
 .last-update {
   color: #6c757d;
   font-size: 0.75rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Main Content */
@@ -698,7 +703,7 @@ export default {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f5f5f5;
 }
 
 /* Tabs */
@@ -806,12 +811,10 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
 th, td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem;
   text-align: left;
   border-bottom: 1px solid #e9ecef;
 }
@@ -821,85 +824,84 @@ th {
   font-weight: 600;
   color: #2c3e50;
   font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 td {
-  color: #2c3e50;
   font-size: 0.9rem;
+  color: #2c3e50;
 }
 
-/* Role and Status Badges */
-.role-badge {
-  padding: 0.25rem 0.5rem;
+/* Role Tags */
+.role-tag {
+  padding: 0.2rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: capitalize;
 }
 
-.role-super-admin {
-  background: #ff5722;
-  color: white;
+.role-tag.super-admin {
+  background: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
 }
 
-.role-admin {
-  background: #2196f3;
-  color: white;
+.role-tag.admin {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196f3;
 }
 
-.role-user {
-  background: #4caf50;
-  color: white;
+.role-tag.user {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
 }
 
+/* Status Badges */
 .status-badge {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
 }
 
 .status-badge.active {
-  background: #4caf50;
-  color: white;
-}
-
-.status-badge.inactive {
-  background: #f44336;
-  color: white;
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
 }
 
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .action-btn {
-  background: none;
+  padding: 0.3rem 0.6rem;
   border: none;
-  padding: 0.4rem;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.action-btn.edit {
+  background: #2196f3;
+  color: white;
 }
 
 .action-btn.edit:hover {
-  background: #e3f2fd;
-  color: #2196f3;
-  transform: scale(1.1);
+  background: #1976d2;
+}
+
+.action-btn.delete {
+  background: #f44336;
+  color: white;
 }
 
 .action-btn.delete:hover {
-  background: #ffebee;
-  color: #f44336;
-  transform: scale(1.1);
+  background: #d32f2f;
 }
 
 /* Permissions List */
@@ -916,6 +918,27 @@ td {
   border-radius: 8px;
   font-size: 0.65rem;
   font-weight: 500;
+}
+
+.more-permissions {
+  color: #6c757d;
+  font-size: 0.65rem;
+  font-style: italic;
+}
+
+/* Role Type */
+.role-type {
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.role-type.system {
+  background: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
 }
 
 /* Modal Styles */

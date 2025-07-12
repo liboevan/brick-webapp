@@ -1,126 +1,182 @@
 <template>
-  <div class="dashboard">
-    <!-- Header -->
-    <header class="dashboard-header">
-      <div class="header-content">
-        <div class="title-with-logo">
-          <img src="/favicon.png" alt="Brick Logo" class="brick-icon-large" />
-          <h1 class="dashboard-title">{{ config.title }}</h1>
-        </div>
-        <p class="dashboard-subtitle">{{ config.subtitle }}</p>
-        <!-- system-status removed for minimal header -->
-        <!-- user-info removed, avatar is now in top right -->
+  <Layout>
+    <!-- Page Title in Header -->
+    <template #pageTitle>
+      <h1 class="page-title">Dashboard</h1>
+    </template>
+    
+    <!-- Page Controls in Header -->
+    <template #pageControls>
+      <div class="dashboard-info">
+        <span class="welcome-text">Welcome back, {{ user?.username || 'Guest' }}!</span>
+        <span class="last-login">Last login: {{ lastLoginTime }}</span>
       </div>
-      <div class="dashboard-avatar">
-        <AvatarDropdown :isAuthenticated="isAuthenticated" :user="user" @logout="logout" />
-      </div>
-    </header>
-
+    </template>
+    
     <!-- Main Content -->
-    <main class="dashboard-main">
-      <div class="features-grid">
-        <div 
-          v-for="feature in allFeatures" 
-          :key="feature.id"
-          class="feature-card"
-          :style="feature.id === 'ntp' ? '--card-color: #388E3C' : `--card-color: ${feature.color}`"
-          @click="navigateToFeature(feature)"
-        >
-          <div class="feature-icon">{{ feature.icon }}</div>
-          <div class="feature-content">
-            <h3 class="feature-title">{{ feature.title }}</h3>
-            <p class="feature-description">{{ feature.description }}</p>
+    <div class="dashboard">
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">⏰</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.ntpStatus || 'Unknown' }}</div>
+            <div class="stat-label">NTP Status</div>
           </div>
-          <div class="feature-arrow">→</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.activeUsers || 0 }}</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">🔐</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalRoles || 0 }}</div>
+            <div class="stat-label">Roles</div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">🔑</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalPermissions || 0 }}</div>
+            <div class="stat-label">Permissions</div>
+          </div>
         </div>
       </div>
 
       <!-- Quick Actions -->
       <div class="quick-actions">
-        <h2 class="section-title">Quick Actions</h2>
+        <h2>Quick Actions</h2>
         <div class="actions-grid">
-          <button class="action-btn" @click="refreshStatus">
-            <span class="action-icon">🔄</span>
-            <span>Refresh Status</span>
-          </button>
-          <button class="action-btn" @click="showSystemInfo">
-            <span class="action-icon">ℹ️</span>
-            <span>System Info</span>
-          </button>
+          <router-link to="/ntp" class="action-card">
+            <div class="action-icon">⏰</div>
+            <div class="action-content">
+              <h3>NTP Management</h3>
+              <p>Configure and monitor time synchronization</p>
+            </div>
+          </router-link>
+          
+          <router-link v-if="isSuperAdmin" to="/admin" class="action-card">
+            <div class="action-icon">🔧</div>
+            <div class="action-content">
+              <h3>Admin Panel</h3>
+              <p>Manage users, roles, and permissions</p>
+            </div>
+          </router-link>
+          
+          <div class="action-card">
+            <div class="action-icon">📊</div>
+            <div class="action-content">
+              <h3>System Status</h3>
+              <p>View system health and performance</p>
+            </div>
+          </div>
+          
+          <div class="action-card">
+            <div class="action-icon">⚙️</div>
+            <div class="action-content">
+              <h3>Settings</h3>
+              <p>Configure application preferences</p>
+            </div>
+          </div>
         </div>
       </div>
-    </main>
 
-    <!-- Footer removed for minimal header -->
-  </div>
+      <!-- Recent Activity -->
+      <div class="recent-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-list">
+          <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+            <div class="activity-icon" :class="activity.type">{{ activity.icon }}</div>
+            <div class="activity-content">
+              <div class="activity-title">{{ activity.title }}</div>
+              <div class="activity-time">{{ formatTime(activity.timestamp) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Layout>
 </template>
 
 <script>
-import { getConfig } from '../config/dashboard.js'
-import AvatarDropdown from './AvatarDropdown.vue'
 import authMixin from '../mixins/auth.js'
+import Layout from './Layout.vue'
 
 export default {
   name: 'Dashboard',
+  mixins: [authMixin],
+  components: {
+    Layout
+  },
   data() {
     return {
-      config: getConfig()
+      stats: {
+        ntpStatus: 'Synchronized',
+        activeUsers: 5,
+        totalRoles: 3,
+        totalPermissions: 12
+      },
+      lastLoginTime: new Date().toLocaleString(),
+      recentActivities: [
+        {
+          id: 1,
+          type: 'success',
+          icon: '✅',
+          title: 'NTP synchronization successful',
+          timestamp: new Date(Date.now() - 300000) // 5 minutes ago
+        },
+        {
+          id: 2,
+          type: 'info',
+          icon: '👤',
+          title: 'User login: admin',
+          timestamp: new Date(Date.now() - 600000) // 10 minutes ago
+        },
+        {
+          id: 3,
+          type: 'warning',
+          icon: '⚠️',
+          title: 'System backup completed',
+          timestamp: new Date(Date.now() - 1800000) // 30 minutes ago
+        },
+        {
+          id: 4,
+          type: 'info',
+          icon: '🔧',
+          title: 'Configuration updated',
+          timestamp: new Date(Date.now() - 3600000) // 1 hour ago
+        }
+      ]
     }
   },
   computed: {
-    enabledFeatures() {
-      return this.config.features.filter(feature => feature.enabled)
-    },
-    
-    // Add admin management feature for super-admin users
-    adminFeatures() {
-      if (!this.isAuthenticated || !this.user || this.user.role !== 'super-admin') {
-        return []
-      }
-      
-      return [
-        {
-          id: 'admin-management',
-          title: 'Admin Management',
-          description: 'Manage users, roles, and permissions',
-          icon: '⚙️',
-          url: '/admin',
-          color: '#ff5722',
-          enabled: true
-        }
-      ]
-    },
-    
-    // Combine regular features with admin features
-    allFeatures() {
-      return [...this.enabledFeatures, ...this.adminFeatures]
+    isSuperAdmin() {
+      return this.user && this.user.role === 'super-admin'
     }
   },
   mounted() {
-    // Ensure auth state is up to date
-    this.checkAuth && this.checkAuth()
-  },
-  mixins: [authMixin],
-  components: {
-    AvatarDropdown
+    // Set browser title
+    document.title = 'Brick - Dashboard'
   },
   methods: {
-    navigateToFeature(feature) {
-      // 直接跳转到 feature.url
-      if (feature.url) {
-        this.$router.push(feature.url)
-      } else {
-        alert(`Feature: ${feature.title}\nURL: ${feature.url}\n\nThis would navigate to the actual feature.`)
-      }
-    },
-
-    refreshStatus() {
-      // Implement status refresh logic
-      console.log('Refreshing system status...')
-    },
-    showSystemInfo() {
-      // Implement system info display
-      console.log('Showing system information...')
+    formatTime(timestamp) {
+      const now = new Date()
+      const diff = now - timestamp
+      const minutes = Math.floor(diff / 60000)
+      const hours = Math.floor(diff / 3600000)
+      const days = Math.floor(diff / 86400000)
+      
+      if (minutes < 1) return 'Just now'
+      if (minutes < 60) return `${minutes}m ago`
+      if (hours < 24) return `${hours}h ago`
+      return `${days}d ago`
     }
   }
 }
@@ -128,295 +184,266 @@ export default {
 
 <style scoped>
 .dashboard {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
+  padding: 1rem;
+  background: #f5f5f5;
+  min-height: calc(100vh - 80px);
 }
 
-/* Header Styles */
-.dashboard-header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 2rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.title-with-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  position: relative;
-  left: -1.5rem;
-}
-
-.brick-icon-large {
-  width: 3rem;
-  height: 3rem;
-  object-fit: contain;
-}
-
-.dashboard-avatar {
-  position: absolute;
-  right: 2rem;
-  top: 2.7rem;
-  z-index: 11000;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(60,60,60,0.13);
-  border: 1.5px solid #e0e0e0;
-  padding: 0.18rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-.dashboard-avatar:hover {
-  box-shadow: 0 8px 24px rgba(60,60,60,0.18);
-  border-color: #b2dfdb;
-  background: #f8fafb;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.dashboard-title {
-  font-size: 3rem;
+/* Page Title Styles */
+.page-title {
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--white);
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: var(--primary-green);
+  margin: 0;
 }
 
-.dashboard-subtitle {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1rem;
+/* Dashboard Info Styles */
+.dashboard-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  margin-left: auto;
+  padding-right: 1rem;
+  min-height: 1.5rem;
+  justify-content: center;
 }
 
-.system-status {
+.welcome-text {
+  color: #4CAF50;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.last-login {
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border-radius: 12px;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.user-name {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
-}
-
-.logout-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--white);
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.8rem;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #4CAF50;
-  animation: pulse 2s infinite;
-}
-
-.status-indicator.online {
-  background: #4CAF50;
-}
-
-.status-indicator.offline {
-  background: #f44336;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-/* Main Content */
-.dashboard-main {
-  flex: 1 0 auto;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.feature-card {
-  background: var(--white);
-  border-radius: var(--border-radius);
-  padding: 2rem;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-left: 4px solid var(--card-color);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--card-color);
-}
-
-.feature-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
-}
-
-.feature-content {
+.stat-content {
   flex: 1;
 }
 
-.feature-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--dark-gray);
-  margin-bottom: 0.5rem;
-}
-
-.feature-description {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.feature-arrow {
+.stat-value {
   font-size: 1.5rem;
-  color: var(--card-color);
-  font-weight: bold;
-  transition: transform 0.3s ease;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
 }
 
-.feature-card:hover .feature-arrow {
-  transform: translateX(4px);
+.stat-label {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 /* Quick Actions */
 .quick-actions {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--border-radius);
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  margin-top: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.section-title {
-  color: var(--white);
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
+.quick-actions h2 {
+  color: #2c3e50;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .actions-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
-.action-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--white);
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: all 0.3s ease;
+.action-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
-.action-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+.action-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 1);
 }
 
 .action-icon {
-  font-size: 1.1rem;
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+  border-radius: 12px;
 }
 
-/* dashboard-footer removed */
+.action-content h3 {
+  color: #2c3e50;
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.action-content p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Recent Activity */
+.recent-activity h2 {
+  color: #2c3e50;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.activity-list {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.3s ease;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-item:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.2rem;
+}
+
+.activity-icon.success {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+}
+
+.activity-icon.info {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196F3;
+}
+
+.activity-icon.warning {
+  background: rgba(255, 152, 0, 0.2);
+  color: #FF9800;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  color: #2c3e50;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.activity-time {
+  color: #6c757d;
+  font-size: 0.8rem;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .dashboard-title {
-    font-size: 2rem;
+  .dashboard {
+    padding: 0.5rem;
   }
   
-  .features-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .feature-card {
-    padding: 1.5rem;
   }
   
   .actions-grid {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
   }
   
-  .action-btn {
-    width: 200px;
-    justify-content: center;
+  .stat-card,
+  .action-card {
+    padding: 1rem;
+  }
+  
+  .stat-icon,
+  .action-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-info {
+    display: none;
   }
 }
 </style> 

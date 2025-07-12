@@ -155,6 +155,11 @@ export default {
     // Check if user has admin role
     isAdmin() {
       return this.user && this.user.role === 'admin'
+    },
+    
+    // Check if user has super-admin role
+    isSuperAdmin() {
+      return this.user && this.user.role === 'super-admin'
     }
   }
 } 
