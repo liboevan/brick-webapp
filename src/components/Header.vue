@@ -25,7 +25,7 @@
         <div class="user-avatar-container" 
              @mouseenter="handleAvatarMouseEnter"
              @mouseleave="handleAvatarMouseLeave">
-          <div class="user-avatar" :title="user?.username || 'Guest'">
+          <div class="user-avatar" :title="user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.username || 'Guest'">
             <img 
               v-if="user?.avatarUrl" 
               :src="user.avatarUrl" 
@@ -39,6 +39,7 @@
           <div class="user-tooltip" :class="{ visible: showAvatarTooltip }">
             <div class="tooltip-content">
               <div class="tooltip-user-info">
+                <div class="tooltip-full-name">{{ user?.first_name }} {{ user?.last_name }}</div>
                 <div class="tooltip-username">{{ user?.username || 'Guest' }}</div>
                 <div class="tooltip-role">{{ user?.role || 'Guest' }}</div>
               </div>
@@ -81,13 +82,24 @@ export default {
   },
   computed: {
     userInitials() {
-      if (!this.user || !this.user.username) return '👤'
-      return this.user.username
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+      if (!this.user) return '👤'
+      
+      // Try to use first_name and last_name if available
+      if (this.user.first_name && this.user.last_name) {
+        return (this.user.first_name[0] + this.user.last_name[0]).toUpperCase()
+      }
+      
+      // Fallback to username
+      if (this.user.username) {
+        return this.user.username
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2)
+      }
+      
+      return '👤'
     }
   },
   methods: {
@@ -298,10 +310,16 @@ export default {
   border-bottom: 1px solid #e9ecef;
 }
 
-.tooltip-username {
+.tooltip-full-name {
   font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-username {
+  font-size: 0.9rem;
+  color: #6c757d;
   margin-bottom: 0.25rem;
 }
 

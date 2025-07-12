@@ -47,6 +47,8 @@
                 <thead>
                   <tr>
                     <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
                     <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
@@ -56,6 +58,8 @@
                 <tbody>
                   <tr v-for="user in users" :key="user.id">
                     <td>{{ user.username }}</td>
+                    <td>{{ user.first_name || 'N/A' }}</td>
+                    <td>{{ user.last_name || 'N/A' }}</td>
                     <td>{{ user.email || 'N/A' }}</td>
                     <td>
                       <span class="role-tag" :class="user.role">{{ user.role }}</span>
@@ -188,6 +192,16 @@
           <div class="form-group">
             <label>Username</label>
             <input v-model="userForm.username" type="text" required :disabled="editingUser">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input v-model="userForm.first_name" type="text">
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input v-model="userForm.last_name" type="text">
+            </div>
           </div>
           <div class="form-group">
             <label>Password</label>

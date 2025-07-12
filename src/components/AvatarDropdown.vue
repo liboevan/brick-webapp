@@ -1,6 +1,6 @@
 <template>
   <div class="avatar-dropdown" @click="toggleDropdown" @blur="closeDropdown" tabindex="0">
-    <div class="avatar" :title="isAuthenticated ? user.username : 'Not logged in'">
+    <div class="avatar" :title="isAuthenticated ? fullName : 'Not logged in'">
       <template v-if="isAuthenticated">
         <img v-if="user && user.avatarUrl" :src="user.avatarUrl" alt="avatar" />
         <span v-else>{{ initials }}</span>
@@ -12,7 +12,7 @@
     <div v-if="dropdownOpen" class="dropdown-menu">
       <template v-if="isAuthenticated">
         <div class="dropdown-header">
-          <span class="dropdown-username">{{ user.username }}</span>
+          <span class="dropdown-username">{{ fullName }}</span>
         </div>
         <div class="dropdown-item" @click="goProfile">
           <span class="dropdown-icon">👤</span> Profile
@@ -44,8 +44,29 @@ export default {
   },
   computed: {
     initials() {
-      if (!this.user || !this.user.username) return '👤'
-      return this.user.username.split(' ').map(n => n[0]).join('').toUpperCase()
+      if (!this.user) return '👤'
+      
+      // Try to use first_name and last_name if available
+      if (this.user.first_name && this.user.last_name) {
+        return (this.user.first_name[0] + this.user.last_name[0]).toUpperCase()
+      }
+      
+      // Fallback to username
+      if (this.user.username) {
+        return this.user.username.split(' ').map(n => n[0]).join('').toUpperCase()
+      }
+      
+      return '👤'
+    },
+    
+    fullName() {
+      if (!this.user) return 'Guest'
+      
+      if (this.user.first_name && this.user.last_name) {
+        return `${this.user.first_name} ${this.user.last_name}`
+      }
+      
+      return this.user.username || 'Guest'
     }
   },
   methods: {

@@ -40,10 +40,46 @@ export default {
         if (!response.ok) {
           // Token is invalid, clear auth state
           this.logout()
+        } else {
+          // Token is valid, fetch complete user info
+          await this.fetchUserInfo()
         }
       } catch (err) {
         console.error('Token validation error:', err)
         this.logout()
+      }
+    },
+    
+    // Fetch complete user information from /me endpoint
+    async fetchUserInfo() {
+      try {
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.jwtToken}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.user) {
+            // Decode token to get permissions
+            const tokenData = this.decodeToken(this.jwtToken)
+            const permissions = tokenData ? tokenData.permissions || [] : []
+            
+            // Update user object with complete information
+            this.user = {
+              ...this.user,
+              ...data.user,
+              permissions: permissions // Include permissions from JWT token
+            }
+            // Update localStorage
+            localStorage.setItem('user', JSON.stringify(this.user))
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch user info:', err)
       }
     },
     
@@ -85,21 +121,25 @@ export default {
             return false
           }
           
-          // Store JWT token and user info
+          // Store JWT token and basic user info
           localStorage.setItem('jwt_token', data.token)
           localStorage.setItem('isAuthenticated', 'true')
-          localStorage.setItem('user', JSON.stringify({
-            username: tokenData.username,
-            role: tokenData.role,
-            permissions: tokenData.permissions
-          }))
+          
+          // Store complete user info from login response
+          const userInfo = {
+            username: data.user.username,
+            role: data.user.role,
+            permissions: data.permissions || [], // Get permissions from the separate field
+            first_name: data.user.first_name,
+            last_name: data.user.last_name,
+            email: data.user.email,
+            is_active: data.user.is_active
+          }
+          
+          localStorage.setItem('user', JSON.stringify(userInfo))
           
           this.isAuthenticated = true
-          this.user = { 
-            username: tokenData.username, 
-            role: tokenData.role, 
-            permissions: tokenData.permissions 
-          }
+          this.user = userInfo
           this.jwtToken = data.token
           return true
         }
