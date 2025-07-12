@@ -22,7 +22,7 @@
 
 <script>
 import Header from './Header.vue'
-import authMixin from '../mixins/auth.js'
+import authMixin from '../mixins/auth'
 
 export default {
   name: 'Layout',

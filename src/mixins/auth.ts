@@ -1,5 +1,41 @@
-export default {
-  data() {
+import type { User, LoginRequest, LoginResponse } from '../types'
+import type { ComponentOptions } from 'vue'
+
+interface AuthData {
+  isAuthenticated: boolean
+  user: User | null
+  jwtToken: string | null
+}
+
+interface TokenClaims {
+  user_id: number
+  username: string
+  role: string
+  permissions: string[]
+  exp: number
+  iat: number
+  nbf: number
+}
+
+interface AuthMixin {
+  isAuthenticated: boolean
+  user: User | null
+  jwtToken: string | null
+  checkAuth(): void
+  validateToken(): Promise<void>
+  fetchUserInfo(): Promise<void>
+  decodeToken(token: string): TokenClaims | null
+  login(username: string, password: string): Promise<boolean>
+  logout(): void
+  requireAuth(): boolean
+  getAuthHeaders(): Record<string, string>
+  hasPermission(permission: string): boolean
+  isAdmin(): boolean
+  isSuperAdmin(): boolean
+}
+
+const authMixin: ComponentOptions<AuthMixin> = {
+  data(): AuthData {
     return {
       isAuthenticated: false,
       user: null,
@@ -12,12 +48,12 @@ export default {
   },
   
   methods: {
-    checkAuth() {
+    checkAuth(): void {
       const auth = localStorage.getItem('isAuthenticated')
       const user = localStorage.getItem('user')
       const token = localStorage.getItem('jwt_token')
       
-      this.isAuthenticated = auth === 'true' && token
+      this.isAuthenticated = auth === 'true' && !!token
       this.user = user ? JSON.parse(user) : null
       this.jwtToken = token
       
@@ -27,7 +63,7 @@ export default {
       }
     },
     
-    async validateToken() {
+    async validateToken(): Promise<void> {
       try {
         const response = await fetch('/api/auth/validate', {
           method: 'POST',
@@ -51,7 +87,7 @@ export default {
     },
     
     // Fetch complete user information from /me endpoint
-    async fetchUserInfo() {
+    async fetchUserInfo(): Promise<void> {
       try {
         const response = await fetch('/api/auth/me', {
           method: 'GET',
@@ -65,7 +101,7 @@ export default {
           const data = await response.json()
           if (data.user) {
             // Decode token to get permissions
-            const tokenData = this.decodeToken(this.jwtToken)
+            const tokenData = this.decodeToken(this.jwtToken!)
             const permissions = tokenData ? tokenData.permissions || [] : []
             
             // Update user object with complete information
@@ -84,7 +120,7 @@ export default {
     },
     
     // Decode JWT token to get user information
-    decodeToken(token) {
+    decodeToken(token: string): TokenClaims | null {
       try {
         const base64Url = token.split('.')[1]
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
@@ -98,7 +134,7 @@ export default {
       }
     },
     
-    async login(username, password) {
+    async login(username: string, password: string): Promise<boolean> {
       try {
         const response = await fetch('/api/auth/login', {
           method: 'POST',
@@ -108,11 +144,11 @@ export default {
           body: JSON.stringify({
             username: username,
             password: password
-          })
+          } as LoginRequest)
         })
 
         if (response.ok) {
-          const data = await response.json()
+          const data: LoginResponse = await response.json()
           
           // Decode token to get user information
           const tokenData = this.decodeToken(data.token)
@@ -126,7 +162,8 @@ export default {
           localStorage.setItem('isAuthenticated', 'true')
           
           // Store complete user info from login response
-          const userInfo = {
+          const userInfo: User = {
+            id: data.user.id,
             username: data.user.username,
             role: data.user.role,
             permissions: data.permissions || [], // Get permissions from the separate field
@@ -150,7 +187,7 @@ export default {
       }
     },
     
-    logout() {
+    logout(): void {
       localStorage.removeItem('jwt_token')
       localStorage.removeItem('isAuthenticated')
       localStorage.removeItem('user')
@@ -163,7 +200,7 @@ export default {
       this.$router.push('/')
     },
     
-    requireAuth() {
+    requireAuth(): boolean {
       if (!this.isAuthenticated) {
         this.$router.push('/login')
         return false
@@ -172,7 +209,7 @@ export default {
     },
     
     // Helper method to get auth headers for API calls
-    getAuthHeaders() {
+    getAuthHeaders(): Record<string, string> {
       if (this.jwtToken) {
         return {
           'Authorization': `Bearer ${this.jwtToken}`,
@@ -185,7 +222,7 @@ export default {
     },
     
     // Check if user has specific permission
-    hasPermission(permission) {
+    hasPermission(permission: string): boolean {
       if (!this.user || !this.user.permissions) {
         return false
       }
@@ -193,13 +230,15 @@ export default {
     },
     
     // Check if user has admin role
-    isAdmin() {
-      return this.user && this.user.role === 'admin'
+    isAdmin(): boolean {
+      return this.user?.role === 'admin'
     },
     
     // Check if user has super-admin role
-    isSuperAdmin() {
-      return this.user && this.user.role === 'super-admin'
+    isSuperAdmin(): boolean {
+      return this.user?.role === 'super-admin'
     }
   }
-} 
+}
+
+export default authMixin 

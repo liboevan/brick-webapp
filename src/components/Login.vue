@@ -41,15 +41,16 @@
         </button>
       </form>
 
-      <div class="login-footer">
+      <!-- 移除默认用户信息 -->
+      <!-- <div class="login-footer">
         <p>Default users: brick-admin / brickadminpass or brick / brickpass</p>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
-import authMixin from '../mixins/auth.js'
+import authMixin from '../mixins/auth'
 
 export default {
   name: 'Login',

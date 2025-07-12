@@ -202,7 +202,7 @@
 import { getApiConfig } from '../config/dashboard.js'
 import NTPServerClientsModal from './NTPServerClientsModal.vue'
 import NTPServersManagerModal from './NTPServersManagerModal.vue'
-import authMixin from '../mixins/auth.js'
+import authMixin from '../mixins/auth'
 import Layout from './Layout.vue'
 
 export default {

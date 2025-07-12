@@ -310,7 +310,7 @@
 </template>
 
 <script>
-import authMixin from '../mixins/auth.js'
+import authMixin from '../mixins/auth'
 import Layout from './Layout.vue'
 
 export default {

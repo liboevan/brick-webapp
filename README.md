@@ -1,164 +1,166 @@
 # Brick Hub
 
-> A modern Vue.js 3 dashboard for the Brick ecosystem
+[English README](./README.en.md)
+
+> 现代化 Vue.js 3 仪表盘，服务于 Brick 生态
 
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.4+-green.svg)](https://vuejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com/)
 
-Brick Hub is the central dashboard and user interface for the Brick ecosystem, providing unified access to all Brick services including NTP management, security monitoring, and system administration.
+Brick Hub 是 Brick 生态的统一管理界面，提供 NTP 管理、安全监控、系统运维等一站式入口。
 
-## ✨ Features
+## ✨ 功能亮点
 
-- **🎛️ Unified Dashboard** - Single interface for all Brick services
-- **📊 Real-time Monitoring** - Live status and metrics for all components
-- **🕐 Custom NTP Management** - Advanced time synchronization configuration
-- **🛡️ Security Sentinel** - User authentication and system security
-- **🚪 Gateway Monitoring** - Reverse proxy and traffic management
-- **📱 Responsive Design** - Mobile-first, modern UI with green theme
-- **⚙️ Runtime Configuration** - Configure without rebuilding
-- **🐳 Docker Ready** - Production-ready containerization
+- **🎛️ 统一仪表盘** - 所有 Brick 服务一站式管理
+- **📊 实时监控** - 各组件状态与指标实时展示
+- **🕐 NTP 管理** - 高级时间同步配置
+- **🛡️ 安全中心** - 用户认证与系统安全
+- **🚪 网关监控** - 反向代理与流量管理
+- **📱 响应式设计** - 绿主题现代 UI，移动优先
+- **⚙️ 运行时配置** - 无需重建即可切换配置
+- **🐳 Docker 支持** - 生产级容器化
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### One-Command Setup (Recommended)
+### 一键启动（推荐）
 
 ```bash
 ./scripts/quick_start.sh
 ```
 
-This performs a complete build → run → launch cycle.
+自动完成构建 → 运行 → 启动。
 
-### Development Mode
+### 开发模式
 
 ```bash
-# Install dependencies
+# 安装依赖
 npm install
 
-# Start development server
+# 启动开发服务器
 npm run dev
-# Access at http://localhost:3000
+# 访问 http://localhost:3000
 ```
 
-### Production Deployment
+### 生产部署
 
 ```bash
-# Build Docker image
+# 构建 Docker 镜像
 ./scripts/quick_start.sh build
 
-# Run container
+# 运行容器
 ./scripts/quick_start.sh run
 
-# Or do both in one command
+# 一步完成构建和运行
 ./scripts/quick_start.sh all
 ```
 
-## 📋 Prerequisites
+## 📋 依赖要求
 
-- **Node.js** 18+ and npm
-- **Docker** and Docker Compose (for production)
-- **Modern web browser** (Chrome, Firefox, Safari, Edge)
+- **Node.js** 18+ 及 npm
+- **Docker** 与 Docker Compose（生产环境）
+- **现代浏览器**（Chrome、Firefox、Safari、Edge）
 
-## 🛠️ Scripts Reference
+## 🛠️ 脚本说明
 
-### Main Management Script
+### 主管理脚本
 
 ```bash
 ./scripts/quick_start.sh [action] [version]
 ```
 
-| Action | Description |
-|--------|-------------|
-| `build` | Build Docker image only |
-| `run` | Run container only |
-| `test` | Test web application (browser interface) |
-| `clean` | Clean container and optionally images |
-| `logs` | Show container logs |
-| `status` | Show container status and URLs |
-| `all` (default) | Full cycle (build → run → launch) |
+| 动作 | 说明 |
+|------|------|
+| `build` | 仅构建 Docker 镜像 |
+| `run` | 仅运行容器 |
+| `test` | 测试 Web 应用（浏览器界面） |
+| `clean` | 清理容器及可选镜像 |
+| `logs` | 查看容器日志 |
+| `status` | 查看容器状态与访问地址 |
+| `all` (默认) | 全流程（构建 → 运行 → 启动） |
 
-**Examples:**
+**示例：**
 ```bash
-./scripts/quick_start.sh                    # Full cycle with default version
-./scripts/quick_start.sh build              # Build only
-./scripts/quick_start.sh run                # Run only
-./scripts/quick_start.sh 1.0.0             # Full cycle with version 1.0.0
-./scripts/quick_start.sh build 1.0.0       # Build with version 1.0.0
-./scripts/quick_start.sh clean --image      # Clean container and all images
+./scripts/quick_start.sh                    # 默认全流程
+./scripts/quick_start.sh build              # 仅构建
+./scripts/quick_start.sh run                # 仅运行
+./scripts/quick_start.sh 1.0.0             # 指定版本全流程
+./scripts/quick_start.sh build 1.0.0       # 指定版本构建
+./scripts/quick_start.sh clean --image      # 清理容器及镜像
 ```
 
-### Individual Scripts
+### 单独脚本
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `build-info.sh` | Generate build metadata | `./scripts/build-info.sh` |
-| `clean.sh` | Clean container and images | `./scripts/clean.sh [--image]` |
-| `config.sh` | Shared configuration | Used by other scripts |
-| `run.sh` | Run container | `./scripts/run.sh [version]` |
-| `build.sh` | Build Docker image | `./scripts/build.sh [version]` |
+| 脚本 | 作用 | 用法 |
+|------|------|------|
+| `build-info.sh` | 生成构建元信息 | `./scripts/build-info.sh` |
+| `clean.sh` | 清理容器与镜像 | `./scripts/clean.sh [--image]` |
+| `config.sh` | 共享配置 | 被其他脚本调用 |
+| `run.sh` | 运行容器 | `./scripts/run.sh [version]` |
+| `build.sh` | 构建镜像 | `./scripts/build.sh [version]` |
 
-## 🏗️ Project Structure
+## 🏗️ 项目结构
 
 ```
 brick-hub/
-├── src/                    # Vue.js application source
-│   ├── components/         # Vue components
-│   │   ├── Dashboard.vue   # Main dashboard interface
-│   │   ├── Login.vue       # Authentication interface
-│   │   ├── CustomNTP.vue   # NTP management interface
-│   │   └── BuildInfo.vue   # Build information display
-│   ├── mixins/             # Shared functionality
-│   │   └── auth.js         # Authentication logic
-│   ├── config/             # Configuration
-│   │   └── dashboard.js    # Feature configuration
-│   ├── App.vue             # Root component
-│   └── main.js             # Application entry point
-├── public/                 # Static assets and runtime config
-│   ├── config.js           # Active runtime configuration
-│   ├── config.dev.js       # Development configuration
-│   ├── config.prod.js      # Production configuration
-│   └── build-info.js       # Build metadata
-├── scripts/                # Management scripts
-│   ├── quick_start.sh      # Main management script
-│   ├── build-info.sh       # Build metadata generation
-│   ├── clean.sh            # Clean build artifacts
-│   ├── config.sh           # Configuration switching
-│   ├── run.sh              # Quick run script
-│   └── build.sh            # Build script
-├── package.json            # Dependencies and scripts
-├── vite.config.js          # Build configuration
-├── Dockerfile              # Production container
-├── docker-compose.yml      # Development container
-└── README.md               # This file
+├── src/                    # Vue.js 应用源码
+│   ├── components/         # 组件
+│   │   ├── Dashboard.vue   # 主仪表盘
+│   │   ├── Login.vue       # 登录界面
+│   │   ├── CustomNTP.vue   # NTP 管理
+│   │   └── BuildInfo.vue   # 构建信息
+│   ├── mixins/             # 复用逻辑
+│   │   └── auth.ts         # 认证逻辑（TypeScript）
+│   ├── config/             # 配置
+│   │   └── dashboard.js    # 功能配置
+│   ├── App.vue             # 根组件
+│   └── main.ts             # 应用入口
+├── public/                 # 静态资源与运行时配置
+│   ├── config.js           # 当前配置
+│   ├── config.dev.js       # 开发配置
+│   ├── config.prod.js      # 生产配置
+│   └── build-info.js       # 构建元信息
+├── scripts/                # 管理脚本
+│   ├── quick_start.sh      # 主管理脚本
+│   ├── build-info.sh       # 构建信息生成
+│   ├── clean.sh            # 清理
+│   ├── config.sh           # 配置切换
+│   ├── run.sh              # 快速运行
+│   └── build.sh            # 构建脚本
+├── package.json            # 依赖与脚本
+├── vite.config.ts          # 构建配置
+├── Dockerfile              # 生产镜像
+├── docker-compose.yml      # 开发容器
+└── README.md               # 本文件
 ```
 
-## ⚙️ Configuration
+## ⚙️ 配置说明
 
-### Runtime Configuration System
+### 运行时配置系统
 
-The application uses a sophisticated runtime configuration system that allows **build once, configure anywhere** deployment.
+本应用支持“构建一次，随处配置”，无需重建即可切换环境。
 
-**Configuration Files:**
-- `public/config.js` - Active configuration (loaded by app)
-- `public/config.dev.js` - Development configuration template
-- `public/config.prod.js` - Production configuration template
+**配置文件：**
+- `public/config.js` - 当前激活配置（应用加载）
+- `public/config.dev.js` - 开发环境模板
+- `public/config.prod.js` - 生产环境模板
 
-**Quick Configuration Switch:**
+**快速切换配置：**
 ```bash
-# Switch to development
+# 切换到开发环境
 ./scripts/config.sh dev
 
-# Switch to production  
+# 切换到生产环境
 ./scripts/config.sh prod
 
-# Show current config
+# 查看当前配置
 ./scripts/config.sh show
 ```
 
-**Configuration Structure:**
+**配置结构示例：**
 ```javascript
 window.BRICK_CONFIG = {
-  // API Configuration - All through gateway
+  // API 配置（全部经由 gateway）
   api: {
     baseUrl: 'http://localhost:17000/api',
     customNTP: {
@@ -182,19 +184,19 @@ window.BRICK_CONFIG = {
     }
   },
 
-  // Application Settings
+  // 应用设置
   app: {
     title: 'Brick Hub',
     version: window.BUILD_INFO?.version || '0.1.0-dev',
     environment: 'production'
   },
 
-  // Feature Configuration
+  // 功能配置
   features: {
     customNTP: {
       enabled: true,
       title: 'Custom NTP',
-      description: 'Configure and manage NTP time synchronization',
+      description: 'NTP 时间同步管理',
       icon: '🕐',
       url: '/customNTP',
       color: '#4CAF50'
@@ -202,7 +204,7 @@ window.BRICK_CONFIG = {
     sentinel: {
       enabled: true,
       title: 'Security Sentinel',
-      description: 'User management and authentication system',
+      description: '用户与安全管理',
       icon: '🛡️',
       url: '/sentinel',
       color: '#FF5722'
@@ -210,7 +212,7 @@ window.BRICK_CONFIG = {
     gateway: {
       enabled: true,
       title: 'Gateway Monitor',
-      description: 'Reverse proxy and traffic management',
+      description: '反向代理与流量管理',
       icon: '🚪',
       url: '/gateway',
       color: '#2196F3'
@@ -218,21 +220,21 @@ window.BRICK_CONFIG = {
     login: {
       enabled: true,
       title: 'Login System',
-      description: 'User authentication and session management',
+      description: '用户认证与会话管理',
       icon: '🔑',
       url: '/login',
       color: '#9C27B0'
     }
   },
 
-  // System Configuration
+  // 系统信息
   system: {
     name: 'Brick System',
     version: window.BUILD_INFO?.version || '0.1.0-dev',
     status: 'online'
   },
 
-  // Debug Settings
+  // 调试设置
   debug: {
     enabled: false,
     logLevel: 'info'
@@ -240,187 +242,187 @@ window.BRICK_CONFIG = {
 }
 ```
 
-**How Runtime Configuration Works:**
-1. **Build once**: `npm run build` creates static files
-2. **Configure runtime**: Modify `public/config.js` for environment
-3. **Deploy**: Same build works for dev/prod with different configs
-4. **No rebuild needed**: Just change config file and refresh
+**运行时配置原理：**
+1. **一次构建**：`npm run build` 生成静态文件
+2. **运行时配置**：修改 `public/config.js` 切换环境
+3. **部署**：同一构建适配开发/生产
+4. **无需重建**：只需更改配置文件并刷新
 
-## 🔌 API Integration
+## 🔌 API 集成
 
-### Backend Services
+### 后端服务
 
-The application integrates with these Brick ecosystem services:
+本应用集成以下 Brick 生态服务：
 
-| Service | Purpose | Default Port | API Path |
-|---------|---------|--------------|----------|
-| **customNTP** | NTP time synchronization | 17003 | `/api/customNTP/*` |
-| **brick-sentinel** | Authentication & security | 17001 | `/api/sentinel/*` |
-| **brick-gateway** | Reverse proxy & routing | 17000 | `/api/*` |
+| 服务 | 用途 | 默认端口 | API 路径 |
+|------|------|----------|----------|
+| **customNTP** | NTP 时间同步 | 17003 | `/api/customNTP/*` |
+| **brick-sentinel** | 认证与安全 | 17001 | `/api/sentinel/*` |
+| **brick-gateway** | 反向代理与路由 | 17000 | `/api/*` |
 
-All APIs are accessed through the gateway at `http://localhost:17000/api/`.
+所有 API 均通过 gateway 访问，地址为 `http://localhost:17000/api/`。
 
-## 🎨 UI/UX Features
+## 🎨 UI/UX 特性
 
-### Design System
+### 设计系统
 
-- **Primary Color**: Green theme (#4CAF50)
-- **Framework**: Vue 3 with Composition API
-- **Styling**: Scoped CSS with CSS variables
-- **Responsive**: Mobile-first design
-- **Modern UI**: Clean, professional interface
+- **主色调**：绿主题 (#4CAF50)
+- **框架**：Vue 3 与 Composition API
+- **样式**：作用域 CSS 与 CSS 变量
+- **响应式**：移动优先设计
+- **现代 UI**：简洁、专业的界面
 
-### Components
+### 组件
 
-- **Dashboard**: Main interface with configurable feature cards
-- **Login**: Authentication interface with modern design
-- **CustomNTP**: Advanced NTP configuration interface
-- **BuildInfo**: Build metadata display
+- **仪表盘**：可配置功能卡片的主界面
+- **登录**：现代化的登录界面
+- **CustomNTP**：高级 NTP 配置界面
+- **BuildInfo**：构建元信息展示
 
-## 🧪 Development
+## 🧪 开发
 
-### Development Testing
+### 开发测试
 
 ```bash
-# Run linter
+# 运行 linter
 npm run lint
 
-# Start development server
+# 启动开发服务器
 npm run dev
-# Visit http://localhost:3000
+# 访问 http://localhost:3000
 ```
 
-### Demo Credentials
+### 演示凭证
 
-- **Username**: `admin`
-- **Password**: `password`
+- **用户名**：`admin`
+- **密码**：`password`
 
-### Development Workflow
+### 开发工作流程
 
-1. **Local Development**
+1. **本地开发**
    ```bash
    npm run dev
-   # Edit src/ components
-   # Test with mock APIs
+   # 编辑 src/ 组件
+   # 使用 mock API 测试
    ```
 
-2. **Integration Testing**
+2. **集成测试**
    ```bash
    docker-compose up
-   # Test with real backend APIs
+   # 使用真实后端 API 测试
    ```
 
-3. **Production Build**
+3. **生产构建**
    ```bash
    npm run build
-   # Hand over to lead/IT team
+   # 移交给领导/IT 团队
    ```
 
-## 📦 Build and Deploy
+## 📦 构建与部署
 
-### For Frontend Developers
+### 前端开发者
 
 ```bash
-# Build for production
+# 生产环境构建
 npm run build
 
-# Test production build
+# 测试生产构建
 npm run preview
 
-# Build with specific version
+# 带特定版本构建
 VERSION=1.0.0 npm run build:prod
 ```
 
-### For DevOps/IT Team
+### 运维/IT 团队
 
 ```bash
-# Deploy using environment configuration
+# 使用环境配置部署
 cp env.example .env
 ./scripts/deploy.sh deploy
 
-# Or manual deployment
+# 或手动部署
 docker build -t brick-hub .
 docker run -d --name brick-hub --restart unless-stopped -p 17002:80 brick-hub
 ```
 
-## 🌐 Network Configuration
+## 🌐 网络配置
 
-### Ports
+### 端口
 
-| Port | Protocol | Purpose |
-|------|----------|---------|
-| `3000` | TCP | Development server |
-| `17002` | TCP | Production HTTP server |
-| `17000` | TCP | Gateway (API proxy) |
+| 端口 | 协议 | 用途 |
+|------|------|------|
+| `3000` | TCP | 开发服务器 |
+| `17002` | TCP | 生产 HTTP 服务器 |
+| `17000` | TCP | 网关（API 代理） |
 
-### Environment Variables
+### 环境变量
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `VERSION` | `0.1.0-dev` | Application version |
-| `BUILD_DATETIME` | Current time | Build timestamp |
-| `NODE_ENV` | `development` | Node.js environment |
-| `IMAGE_NAME` | `el/brick-hub` | Docker image name |
-| `CONTAINER_NAME` | `el-brick-hub` | Docker container name |
+| 变量 | 默认值 | 描述 |
+|------|------|------|
+| `VERSION` | `0.1.0-dev` | 应用版本 |
+| `BUILD_DATETIME` | 当前时间 | 构建时间戳 |
+| `NODE_ENV` | `development` | Node.js 环境 |
+| `IMAGE_NAME` | `el/brick-hub` | Docker 镜像名称 |
+| `CONTAINER_NAME` | `el-brick-hub` | Docker 容器名称 |
 
-## 🐳 Docker Deployment
+## 🐳 Docker 部署
 
-### Build Image
+### 构建镜像
 
 ```bash
 ./scripts/quick_start.sh build [version]
 ```
 
-**Examples:**
+**示例：**
 ```bash
-./scripts/quick_start.sh build                    # Build with default version
-./scripts/quick_start.sh build 1.0.0             # Build with specific version
+./scripts/quick_start.sh build                    # 使用默认版本构建
+./scripts/quick_start.sh build 1.0.0             # 使用特定版本构建
 ```
 
-### Run Container
+### 运行容器
 
 ```bash
 ./scripts/quick_start.sh run [version]
 ```
 
-**Examples:**
+**示例：**
 ```bash
-./scripts/quick_start.sh run                     # Run with default version
-./scripts/quick_start.sh run 1.0.0              # Run with specific version
+./scripts/quick_start.sh run                     # 使用默认版本运行
+./scripts/quick_start.sh run 1.0.0              # 使用特定版本运行
 ```
 
-## 🔍 Monitoring & Troubleshooting
+## 🔍 监控与故障排除
 
-### Check Service Status
+### 检查服务状态
 
 ```bash
-# Container status
+# 容器状态
 ./scripts/quick_start.sh status
 
-# View logs
+# 查看日志
 ./scripts/quick_start.sh logs
 
-# Test application
+# 测试应用
 curl http://localhost:17002
 ```
 
-### Common Issues
+### 常见问题
 
-1. **Port Conflicts**: Ensure port 17002 is available
-2. **API Connection**: Check if backend services are running
-3. **Build Errors**: Run `npm install` and try again
-4. **Docker Issues**: Check if Docker is running
-5. **Configuration**: Verify `public/config.js` is correct
+1. **端口冲突**：确保端口 17002 可用
+2. **API 连接**：检查后端服务是否运行
+3. **构建错误**：运行 `npm install` 并重试
+4. **Docker 问题**：检查 Docker 是否运行
+5. **配置问题**：验证 `public/config.js` 是否正确
 
-### Development Tips
+### 开发提示
 
-- Use Vue DevTools for debugging
-- Check browser console for errors
-- Test with different screen sizes
-- Validate API responses
-- Use the configuration switch script for environment changes
+- 使用 Vue DevTools 进行调试
+- 检查浏览器控制台错误
+- 使用不同屏幕尺寸测试
+- 验证 API 响应
+- 使用配置切换脚本切换环境
 
-## 🏗️ Architecture
+## 🏗️ 架构
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -441,40 +443,39 @@ curl http://localhost:17002
                        └─────────────────┘
 ```
 
-## 📈 Performance
+## 📈 性能
 
-- **Fast Loading**: Optimized Vue 3 with Vite
-- **Responsive**: Mobile-first design
-- **Scalable**: Modular component architecture
-- **Efficient**: Runtime configuration system
+- **快速加载**：优化 Vue 3 与 Vite
+- **响应式**：移动优先设计
+- **可扩展**：模块化组件架构
+- **高效**：运行时配置系统
 
-## 🔒 Security Considerations
+## 🔒 安全考虑
 
-- **HTTPS**: Use HTTPS in production
-- **Authentication**: Implement proper auth in production
-- **CORS**: Configure CORS for API access
-- **Updates**: Regularly update dependencies
+- **HTTPS**：生产环境使用 HTTPS
+- **认证**：生产环境实施严格认证
+- **CORS**：配置 API 访问的 CORS
+- **更新**：定期更新依赖
 
-## 🤝 Contributing
+## 🤝 贡献
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+1. Fork 项目
+2. 创建功能分支
+3. 进行更改
+4. 全面测试
+5. 提交拉取请求
 
-## 📄 License
+## 📄 许可证
 
-This project is part of the Brick ecosystem. See the main repository for license information.
+本项目是 Brick 生态系统的一部分。请查看主仓库获取许可证信息。
 
-## 📞 Support
+## 📞 支持
 
-For issues and questions:
-- Check the troubleshooting section above
-- Review the API documentation
-- Open an issue in the repository
+如遇问题，请查看故障排除部分：
+- 审查 API 文档
+- 在仓库中打开问题
 
 ---
 
-**Version**: 0.1.0-dev  
-**Last Updated**: January 2025 
+**版本**：0.1.0-dev  
+**最后更新**：2025 年 1 月 

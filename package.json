@@ -9,7 +9,9 @@
     "build:prod": "VERSION=0.1.0 sh scripts/build-info.sh && vite build",
     "build:dev": "VERSION=0.1.0-dev sh scripts/build-info.sh && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint:ts": "eslint . --ext .ts,.tsx,.vue --fix"
   },
   "dependencies": {
     "vue": "^3.4.0",
@@ -17,8 +19,12 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",
+    "@vue/tsconfig": "^0.5.1",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.8.3",
     "vite": "^5.0.0",
-    "eslint": "^8.49.0",
-    "eslint-plugin-vue": "^9.17.0"
+    "eslint": "^9.10.0",
+    "eslint-plugin-vue": "^9.17.0",
+    "vue-tsc": "^2.0.0"
   }
-} 
+}
