@@ -126,7 +126,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
   position: relative;
   left: -1.5rem;

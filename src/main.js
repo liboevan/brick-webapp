@@ -19,7 +19,7 @@ const routes = [
   { 
     path: '/ntp', 
     component: CustomNTP,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: 'Brick - NTP' }
   },
   { 
     path: '/clock', 
@@ -40,6 +40,13 @@ const router = createRouter({
 // Navigation guard with authentication
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true' && localStorage.getItem('jwt_token')
+  
+  // Set page title
+  if (to.meta.title) {
+    document.title = to.meta.title
+  } else {
+    document.title = 'Brick Hub'
+  }
   
   // Public routes (home page and login)
   if (to.path === '/' || to.path === '/login') {
