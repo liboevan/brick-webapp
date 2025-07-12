@@ -30,9 +30,10 @@ export default {
     async validateToken() {
       try {
         const response = await fetch('/api/auth/validate', {
-          method: 'GET',
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.jwtToken}`
+            'Authorization': `Bearer ${this.jwtToken}`,
+            'Content-Type': 'application/json'
           }
         })
         
