@@ -295,7 +295,7 @@ onMounted(() => {
 .modal-content {
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
-  width: 600px;
+  width: 700px;
   height: 600px;
   max-width: 90vw;
   max-height: 90vh;

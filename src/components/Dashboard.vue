@@ -3,7 +3,10 @@
     <!-- Header -->
     <header class="dashboard-header">
       <div class="header-content">
-        <h1 class="dashboard-title">{{ config.title }}</h1>
+        <div class="title-with-logo">
+          <img src="/favicon.png" alt="Brick Logo" class="brick-icon-large" />
+          <h1 class="dashboard-title">{{ config.title }}</h1>
+        </div>
         <p class="dashboard-subtitle">{{ config.subtitle }}</p>
         <!-- system-status removed for minimal header -->
         <!-- user-info removed, avatar is now in top right -->
@@ -86,6 +89,7 @@ export default {
         alert(`Feature: ${feature.title}\nURL: ${feature.url}\n\nThis would navigate to the actual feature.`)
       }
     },
+
     refreshStatus() {
       // Implement status refresh logic
       console.log('Refreshing system status...')
@@ -113,6 +117,25 @@ export default {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   text-align: center;
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title-with-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+  left: -1.5rem;
+}
+
+.brick-icon-large {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
 }
 
 .dashboard-avatar {

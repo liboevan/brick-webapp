@@ -5,7 +5,7 @@
       <div class="header-left">
         <button @click="goToMain" class="brick-logo-btn" title="Back to Main Page">
           <div class="brick-logo">
-            <span class="brick-icon">🧱</span>
+            <img src="/favicon.png" alt="Brick Logo" class="brick-icon-img" />
             <span class="brick-text">BRICK</span>
           </div>
         </button>
@@ -613,7 +613,7 @@ export default {
   min-height: 28px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(76, 175, 80, 0.15);
+  border-bottom: 2px solid rgba(76, 175, 80, 0.4);
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
   flex-shrink: 0;
   position: relative;
@@ -854,11 +854,9 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-  border: none;
+  padding: 0.7rem 1.2rem;
+  background: #4CAF50;
+  border-radius: 4px;
   outline: none;
 }
 
@@ -866,10 +864,16 @@ export default {
   font-size: 1.2rem;
 }
 
+.brick-icon-img {
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+}
+
 .brick-text {
   color: white;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   letter-spacing: 1px;
 }
 
@@ -877,7 +881,6 @@ export default {
 .brick-logo:focus {
   border: none;
   outline: none;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 /* Main Content - 2x3 Grid Layout */
@@ -1494,7 +1497,7 @@ export default {
 .error-message,
 .success-message {
   position: fixed;
-  top: 20px;
+  top: 80px;
   right: 20px;
   padding: 1rem 1.5rem;
   border-radius: 12px;
