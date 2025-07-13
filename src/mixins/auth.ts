@@ -99,16 +99,21 @@ const authMixin: ComponentOptions<AuthMixin> = {
         
         if (response.ok) {
           const data = await response.json()
-          if (data.user) {
-            // Decode token to get permissions
-            const tokenData = this.decodeToken(this.jwtToken!)
-            const permissions = tokenData ? tokenData.permissions || [] : []
+          if (data.role && data.role.permissions) {
+            // Extract permissions from role
+            const permissions = data.role.permissions.map((p: any) => p.name)
             
             // Update user object with complete information
             this.user = {
               ...this.user,
-              ...data.user,
-              permissions: permissions // Include permissions from JWT token
+              id: data.ID,
+              username: data.username,
+              email: data.email,
+              first_name: data.first_name,
+              last_name: data.last_name,
+              role: data.role.name,
+              is_active: data.is_active,
+              permissions: permissions // Include permissions from role
             }
             // Update localStorage
             localStorage.setItem('user', JSON.stringify(this.user))

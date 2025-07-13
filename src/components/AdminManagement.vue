@@ -24,6 +24,7 @@
             :key="tab.id"
             :class="['tab-btn', { active: activeTab === tab.id }]"
             @click="activeTab = tab.id"
+            v-show="tab.id !== 'token' || hasPermission('auth/token_decode')"
           >
             <span class="tab-icon">{{ tab.icon }}</span>
             <span class="tab-label">{{ tab.label }}</span>
@@ -177,6 +178,106 @@
               </table>
             </div>
           </div>
+
+          <!-- Token Decoder Tab -->
+          <div v-if="activeTab === 'token'" class="tab-panel">
+            <div class="panel-header">
+              <h2>Token Decoder</h2>
+              <p class="panel-description">Decode and analyze JWT tokens to view their contents and permissions</p>
+            </div>
+            
+            <div class="token-decoder">
+              <div class="token-input-section">
+                <label for="token-input">JWT Token:</label>
+                <textarea 
+                  id="token-input"
+                  v-model="tokenInput" 
+                  placeholder="Paste your JWT token here..."
+                  rows="4"
+                  class="token-textarea"
+                ></textarea>
+                <div class="token-actions">
+                  <button @click="decodeToken" class="decode-btn" :disabled="!tokenInput.trim()">
+                    <span class="btn-icon">🔍</span>
+                    Decode Token
+                  </button>
+                  <button @click="clearToken" class="clear-btn">
+                    <span class="btn-icon">🗑️</span>
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="decodedToken" class="token-result">
+                <h3>Decoded Token Information</h3>
+                
+                <div class="token-sections">
+                  <!-- Header Section -->
+                  <div class="token-section">
+                    <h4>Header</h4>
+                    <pre class="token-data">{{ JSON.stringify(decodedToken.header, null, 2) }}</pre>
+                  </div>
+
+                  <!-- Payload Section -->
+                  <div class="token-section">
+                    <h4>Payload</h4>
+                    <div class="payload-info">
+                      <div class="info-row">
+                        <span class="info-label">User ID:</span>
+                        <span class="info-value">{{ decodedToken.payload.user_id }}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Username:</span>
+                        <span class="info-value">{{ decodedToken.payload.username }}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Role:</span>
+                        <span class="info-value">
+                          <span class="role-tag" :class="decodedToken.payload.role">{{ decodedToken.payload.role }}</span>
+                        </span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Issued At:</span>
+                        <span class="info-value">{{ formatDate(decodedToken.payload.iat) }}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Expires At:</span>
+                        <span class="info-value">{{ formatDate(decodedToken.payload.exp) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Permissions Section -->
+                  <div class="token-section">
+                    <h4>Permissions ({{ decodedToken.payload.permissions ? decodedToken.payload.permissions.length : 0 }})</h4>
+                    <div v-if="decodedToken.payload.permissions && decodedToken.payload.permissions.length > 0" class="permissions-grid">
+                      <span 
+                        v-for="permission in decodedToken.payload.permissions" 
+                        :key="permission"
+                        class="permission-chip"
+                      >
+                        {{ permission }}
+                      </span>
+                    </div>
+                    <div v-else class="no-permissions">
+                      <span class="no-data">No permissions found in token</span>
+                    </div>
+                  </div>
+
+                  <!-- Raw Token Data -->
+                  <div class="token-section">
+                    <h4>Raw Token Data</h4>
+                    <pre class="token-data">{{ JSON.stringify(decodedToken.payload, null, 2) }}</pre>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="tokenError" class="token-error">
+                <h3>Error</h3>
+                <p class="error-message">{{ tokenError }}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -317,12 +418,13 @@ export default {
   name: 'AdminManagement',
   data() {
     return {
-      activeTab: 'users',
+      activeTab: 'users', // Default to users tab
       lastUpdateTime: new Date().toLocaleTimeString(),
       tabs: [
         { id: 'users', label: 'Users', icon: '👥' },
         { id: 'roles', label: 'Roles', icon: '🔐' },
-        { id: 'permissions', label: 'Permissions', icon: '🔑' }
+        { id: 'permissions', label: 'Permissions', icon: '🔑' },
+        { id: 'token', label: 'Token Decoder', icon: '🔍' }
       ],
       
       // Data
@@ -360,7 +462,12 @@ export default {
       // Editing states
       editingUser: null,
       editingRole: null,
-      editingPermission: null
+      editingPermission: null,
+      
+      // Token decoder
+      tokenInput: '',
+      decodedToken: null,
+      tokenError: null
     }
   },
   
@@ -370,15 +477,27 @@ export default {
     Layout
   },
   
-  async mounted() {
-    if (!this.requireAuth()) return
-    if (!this.isSuperAdmin()) {
-      this.$router.push('/')
-      return
-    }
-    
-    await this.loadData()
-  },
+      async mounted() {
+      if (!this.requireAuth()) return
+      if (!this.isSuperAdmin()) {
+        this.$router.push('/')
+        return
+      }
+      
+      // Check for token decode permission
+      if (!this.hasPermission('auth/token_decode')) {
+        // If no token decode permission, redirect to home
+        this.$router.push('/')
+        return
+      }
+      
+      // Ensure default tab is accessible
+      if (this.activeTab === 'token' && !this.hasPermission('auth/token_decode')) {
+        this.activeTab = 'users'
+      }
+      
+      await this.loadData()
+    },
   
   methods: {
     isSuperAdmin() {
@@ -661,6 +780,56 @@ export default {
         action: ''
       }
       this.editingPermission = null
+    },
+    
+    // Token decoder methods
+    async decodeToken() {
+      if (!this.tokenInput.trim()) return
+      
+      // Check permission
+      if (!this.hasPermission('auth/token_decode')) {
+        this.tokenError = 'You do not have permission to decode tokens'
+        return
+      }
+      
+      this.tokenError = null
+      this.decodedToken = null
+      
+      try {
+        const response = await fetch('/api/auth/token/decode', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.getAuthHeaders()
+          },
+          body: JSON.stringify({
+            token: this.tokenInput.trim()
+          })
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          this.decodedToken = data
+        } else {
+          const error = await response.json()
+          this.tokenError = error.error || 'Failed to decode token'
+        }
+      } catch (error) {
+        console.error('Failed to decode token:', error)
+        this.tokenError = 'Failed to decode token. Please check your connection.'
+      }
+    },
+    
+    clearToken() {
+      this.tokenInput = ''
+      this.decodedToken = null
+      this.tokenError = null
+    },
+    
+    formatDate(timestamp) {
+      if (!timestamp) return 'N/A'
+      const date = new Date(timestamp * 1000)
+      return date.toLocaleString()
     }
   }
 }
@@ -1141,5 +1310,226 @@ input:focus, select:focus, textarea:focus {
   .admin-info {
     display: none;
   }
+}
+
+/* Token Decoder Styles */
+.token-decoder {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.token-input-section {
+  margin-bottom: 2rem;
+}
+
+.token-input-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.token-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.3s ease;
+}
+
+.token-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.token-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.decode-btn, .clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.decode-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.decode-btn:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.decode-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.clear-btn {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.clear-btn:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.token-result {
+  margin-top: 2rem;
+}
+
+.token-result h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.token-sections {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.token-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.token-section h4 {
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.token-data {
+  background: #2c3e50;
+  color: #ecf0f1;
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.payload-info {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 100px;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #495057;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.permission-chip {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid #bbdefb;
+}
+
+.no-permissions {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.no-data {
+  font-style: italic;
+  color: #6c757d;
+}
+
+.token-error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.token-error h3 {
+  color: #721c24;
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #721c24;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.panel-description {
+  color: #6c757d;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 </style> 
