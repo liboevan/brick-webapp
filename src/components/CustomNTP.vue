@@ -161,9 +161,9 @@
                     <span v-if="loading.serverMode" class="loading-spinner">⏳</span>
                     <span v-else>{{ serverModeEnabled ? 'Disable' : 'Enable' }}</span>
                   </button>
-                  <button v-else class="mode-btn" disabled title="Admin only">
+                  <button v-else class="mode-btn" disabled title="Requires clock/server_mode permission">
                     <span class="action-icon">🔒</span>
-                    <span class="action-text">Server Mode (Admin)</span>
+                    <span class="action-text">Server Mode (Locked)</span>
                   </button>
                 </div>
               </div>
@@ -171,13 +171,40 @@
 
             <!-- Action Buttons -->
             <div class="actions-section">
-              <button @click="openClientsModal" class="quick-action-btn">
+              <button 
+                v-if="hasPermission('clock/view') || isSuperAdmin()"
+                @click="openClientsModal" 
+                class="quick-action-btn"
+              >
                 <span class="action-icon">👥</span>
                 <span class="action-text">View Clients</span>
               </button>
-              <button @click="openServersModal" class="quick-action-btn">
+              <button 
+                v-else 
+                class="quick-action-btn" 
+                disabled 
+                title="Requires clock/view permission"
+              >
+                <span class="action-icon">🔒</span>
+                <span class="action-text">View Clients (Locked)</span>
+              </button>
+              
+              <button 
+                v-if="hasPermission('clock/servers') || isSuperAdmin()"
+                @click="openServersModal" 
+                class="quick-action-btn"
+              >
                 <span class="action-icon">📡</span>
                 <span class="action-text">Server Manager</span>
+              </button>
+              <button 
+                v-else 
+                class="quick-action-btn" 
+                disabled 
+                title="Requires clock/servers permission"
+              >
+                <span class="action-icon">🔒</span>
+                <span class="action-text">Server Manager (Locked)</span>
               </button>
             </div>
           </div>

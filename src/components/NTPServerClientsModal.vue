@@ -132,9 +132,29 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
 const props = defineProps({ serverModeEnabled: Boolean })
 const clients = ref([])
 const loadingClients = ref(false)
+const router = useRouter()
+
+// Check permissions
+function hasPermission(permission) {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  return user.permissions && user.permissions.includes(permission)
+}
+
+function isSuperAdmin() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  return user.role === 'super-admin'
+}
+
+// Check if user has required permission
+if (!hasPermission('clock/view') && !isSuperAdmin()) {
+  // Redirect to home if no permission
+  router.push('/')
+}
 
 // Helper function to get auth headers
 function getAuthHeaders() {
