@@ -18,7 +18,7 @@ cat > public/build-info.json << EOF
   "buildTimestamp": $BUILD_TIMESTAMP,
   "environment": "production",
   "service": "brick-webapp",
-  "description": "Frontend Application"
+  "description": "Brick Hub Frontend Application"
 }
 EOF
 
@@ -30,7 +30,7 @@ window.BUILD_INFO = {
   buildTimestamp: $BUILD_TIMESTAMP,
   environment: "production",
   service: "brick-webapp",}]}}}
-  description: "Frontend Application"
+  description: "Brick Hub Frontend Application"}],"query_language":"Chinese"}}}
 };
 EOF
 

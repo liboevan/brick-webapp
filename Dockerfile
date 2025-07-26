@@ -36,11 +36,11 @@ FROM alpine:latest AS production-stage
 RUN apk --no-cache add nginx curl
 
 # Copy built application
-COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY --from=build-stage /app/dist /var/www/html
 
 # Copy VERSION and build-info.json from build stage
-COPY --from=build-stage /app/VERSION /VERSION
-COPY --from=build-stage /app/build-info.json /build-info.json
+COPY --from=build-stage /app/VERSION /var/www/html/VERSION
+COPY --from=build-stage /app/build-info.json /var/www/html/build-info.json
 
 # Remove default nginx configurations
 RUN rm -rf /etc/nginx/conf.d/* /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*
@@ -56,8 +56,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 EXPOSE 17002
 
 # Set the health check
-# Add volume declaration
-VOLUME ["/var/log/nginx"]
-
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
