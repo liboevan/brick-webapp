@@ -17,13 +17,6 @@
     <div class="dashboard">
       <!-- Quick Stats -->
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">⏰</div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.ntpStatus || 'Unknown' }}</div>
-            <div class="stat-label">NTP Status</div>
-          </div>
-        </div>
         
         <div class="stat-card">
           <div class="stat-icon">👥</div>
@@ -54,13 +47,6 @@
       <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="actions-grid">
-          <router-link to="/ntp" class="action-card">
-            <div class="action-icon">⏰</div>
-            <div class="action-content">
-              <h3>NTP Management</h3>
-              <p>Configure and monitor time synchronization</p>
-            </div>
-          </router-link>
           
           <router-link v-if="isSuperAdmin" to="/admin" class="action-card">
             <div class="action-icon">🔧</div>
@@ -118,20 +104,12 @@ export default {
   data() {
     return {
       stats: {
-        ntpStatus: 'Synchronized',
         activeUsers: 5,
         totalRoles: 3,
         totalPermissions: 12
       },
       lastLoginTime: new Date().toLocaleString(),
       recentActivities: [
-        {
-          id: 1,
-          type: 'success',
-          icon: '✅',
-          title: 'NTP synchronization successful',
-          timestamp: new Date(Date.now() - 300000) // 5 minutes ago
-        },
         {
           id: 2,
           type: 'info',
@@ -446,4 +424,4 @@ export default {
     display: none;
   }
 }
-</style> 
+</style>

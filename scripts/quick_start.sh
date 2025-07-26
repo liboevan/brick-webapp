@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quick Start Script for Brick Hub Service
+# Quick Start Script for Brick Webapp Service
 # Build, run, and launch the web application by default
 # Usage: ./quick_start.sh [action] [version] or ./quick_start.sh [version]
 # Actions: build, run, test, clean, all (default)
@@ -20,7 +20,7 @@ else
     VERSION_ARG=$2
 fi
 
-echo "🚀 Brick Hub Quick Start Script"
+echo "🚀 Brick Webapp Quick Start Script"
 echo "================================"
 
 case $ACTION in
@@ -82,4 +82,4 @@ case $ACTION in
         echo "   Logs: ./scripts/quick_start.sh logs"
         echo "   Status: ./scripts/quick_start.sh status"
         ;;
-esac 
+esac

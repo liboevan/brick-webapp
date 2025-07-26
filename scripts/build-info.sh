@@ -17,7 +17,7 @@ cat > public/build-info.json << EOF
   "buildDateTime": "$BUILD_DATETIME",
   "buildTimestamp": $BUILD_TIMESTAMP,
   "environment": "production",
-  "service": "brick-hub",
+  "service": "brick-webapp",
   "description": "Frontend Application"
 }
 EOF
@@ -29,7 +29,7 @@ window.BUILD_INFO = {
   buildDateTime: "$BUILD_DATETIME",
   buildTimestamp: $BUILD_TIMESTAMP,
   environment: "production",
-  service: "brick-hub",
+  service: "brick-webapp",}]}}}
   description: "Frontend Application"
 };
 EOF
@@ -38,4 +38,4 @@ echo "Build info generated:"
 echo "  Version: $VERSION"
 echo "  Build DateTime: $BUILD_DATETIME"
 echo "  Build Timestamp: $BUILD_TIMESTAMP"
-echo "  Files: public/build-info.json, public/build-info.js" 
+echo "  Files: public/build-info.json, public/build-info.js"

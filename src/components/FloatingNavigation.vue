@@ -10,11 +10,6 @@
     <!-- Expanded Menu -->
     <div v-if="showMenu" class="nav-menu" :class="{ expanded: showMenu }">
       <div class="menu-grid">
-        <!-- NTP Service -->
-        <router-link to="/ntp" class="menu-item" @click="hideMenu">
-          <div class="item-icon">⏰</div>
-          <div class="item-label">NTP</div>
-        </router-link>
         
         <!-- Admin Management (Super Admin Only) -->
         <router-link 
@@ -222,4 +217,4 @@ export default {
     min-width: 180px;
   }
 }
-</style> 
+</style>

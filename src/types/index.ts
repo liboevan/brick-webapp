@@ -22,33 +22,6 @@ export interface LoginResponse {
   permissions: string[]
 }
 
-// NTP Types
-export interface NTPStatus {
-  tracking: Record<string, string>
-  sources: NTPSource[]
-  activity: Record<string, string>
-  server_mode_enabled?: boolean
-}
-
-export interface NTPSource {
-  state: string
-  name: string
-  stratum: string
-  poll: string
-  reach: string
-  lastrx: string
-  offset?: string
-  delay?: string
-  raw: string
-}
-
-export interface NTPClient {
-  address: string
-  ntp_packets?: string
-  ntp_dropped?: string
-  offset?: string
-  raw: string
-}
 
 export interface ServerModeRequest {
   enabled: boolean
@@ -71,7 +44,7 @@ export interface APIConfig {
       version: string
       defaultServers: string
     }
-  }
+  },
   sentinel: {
     baseUrl: string
     endpoints: {
@@ -82,6 +55,8 @@ export interface APIConfig {
     }
   }
 }
+
+
 
 export interface AppConfig {
   title: string
@@ -151,4 +126,4 @@ declare global {
     BRICK_CONFIG: BrickConfig
     BUILD_INFO?: BuildInfo
   }
-} 
+}

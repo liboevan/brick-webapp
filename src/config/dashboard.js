@@ -21,15 +21,6 @@ export const getConfig = () => {
     // Features from runtime config
     features: [
       {
-        id: 'customNTP',
-        title: config.features.customNTP.title,
-        description: config.features.customNTP.description,
-        icon: config.features.customNTP.icon,
-        url: config.features.customNTP.url,
-        color: config.features.customNTP.color,
-        enabled: config.features.customNTP.enabled
-      },
-      {
         id: 'security',
         title: config.features.sentinel.title,
         description: config.features.sentinel.description,
@@ -79,7 +70,6 @@ export const getApiConfig = () => {
   const config = getRuntimeConfig()
   return {
     gatewayUrl: config.api.baseUrl,
-    customNTPApi: config.api.customNTP.baseUrl, // Use the customNTP baseUrl directly
     sentinelApi: config.api.sentinel.baseUrl
   }
 }
@@ -88,4 +78,4 @@ export const getApiConfig = () => {
 export const getEnvironment = () => {
   const config = getRuntimeConfig()
   return config.app.environment
-} 
+}

@@ -4,9 +4,9 @@
 # This file contains common variables and functions used by all scripts
 
 # Project Configuration
-PROJECT_NAME="brick-hub"
-IMAGE_NAME="el/brick-hub"
-CONTAINER_NAME="el-brick-hub"
+PROJECT_NAME="brick-webapp"
+IMAGE_NAME="brick-webapp"
+CONTAINER_NAME="brick-webapp"
 API_PORT="17002"
 DEFAULT_VERSION="0.1.0-dev"
 
@@ -32,7 +32,7 @@ print_error() {
 
 print_header() {
     echo -e "${BLUE}======================================"
-    echo -e "Brick Hub - $1"
+    echo -e "Brick Webapp - $1"
     echo -e "======================================${NC}"
 }
 

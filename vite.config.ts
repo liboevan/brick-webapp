@@ -18,6 +18,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     rollupOptions: {
+      external: ['/favicon.png'],
       output: {
         manualChunks: {
           vendor: ['vue', 'vue-router']

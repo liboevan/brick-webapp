@@ -1,5 +1,5 @@
 # Multi-stage build for Vue.js application
-FROM node:20.10-alpine as build-stage
+FROM node:20.10-alpine AS build-stage
 
 # Set working directory
 WORKDIR /app
@@ -29,10 +29,11 @@ RUN npm run build
 RUN echo "$VERSION" > /app/VERSION
 
 # Create build-info.json in container (not in codebase)
-RUN echo "{\"version\":\"$VERSION\",\"buildDateTime\":\"$BUILD_DATETIME\",\"buildTimestamp\":$(date +%s),\"environment\":\"production\",\"service\":\"brick-hub\",\"description\":\"Frontend Application\"}" > /app/build-info.json
+RUN echo "{\"version\":\"$VERSION\",\"buildDateTime\":\"$BUILD_DATETIME\",\"buildTimestamp\":$(date +%s),\"environment\":\"production\",\"service\":\"brick-webapp\",\"description\":\"Frontend Application\"}" > /app/build-info.json
 
 # Production stage
-FROM nginx:alpine as production-stage
+FROM alpine:latest AS production-stage
+RUN apk --no-cache add nginx curl
 
 # Copy built application
 COPY --from=build-stage /app/dist /usr/share/nginx/html
@@ -41,11 +42,22 @@ COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY --from=build-stage /app/VERSION /VERSION
 COPY --from=build-stage /app/build-info.json /build-info.json
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Remove default nginx configurations
+RUN rm -rf /etc/nginx/conf.d/* /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*
 
-# Expose port
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:17002/health || exit 1
+
+# Expose the application port
 EXPOSE 17002
 
+# Set the health check
+# Add volume declaration
+VOLUME ["/var/log/nginx"]
+
 # Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["nginx", "-g", "daemon off;"]

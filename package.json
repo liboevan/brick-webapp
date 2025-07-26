@@ -1,7 +1,7 @@
 {
-  "name": "brick-hub",
+  "name": "brick-webapp",
   "version": "0.1.0-dev",
-  "description": "Brick Hub - Frontend Application",
+  "description": "Brick Webapp - Frontend Application",
   "type": "module",
   "scripts": {
     "dev": "vite",

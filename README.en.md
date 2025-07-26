@@ -44,6 +44,8 @@ npm run dev
 
 ### Production Deployment
 
+> **Note**: This project uses `brick-webpp` for Docker image and container names, while the project display name remains **Brick Hub**. This note is to avoid confusion.
+
 ```bash
 # Build Docker image
 ./scripts/quick_start.sh build
@@ -339,4 +341,4 @@ cp env.example .env
 ./scripts/deploy.sh deploy
 
 # Or manual deployment
-``` 
+```

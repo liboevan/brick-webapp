@@ -1,9 +1,9 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
 import App from './App.vue'
 import Dashboard from './components/Dashboard.vue'
 import Login from './components/Login.vue'
-import CustomNTP from './components/CustomNTP.vue'
 import AdminManagement from './components/AdminManagement.vue'
 import type { RouteMeta } from './types'
 
@@ -16,16 +16,6 @@ const routes: RouteRecordRaw[] = [
   { 
     path: '/login', 
     component: Login 
-  },
-  { 
-    path: '/ntp', 
-    component: CustomNTP,
-    meta: { requiresAuth: true, title: 'Brick - NTP' } as RouteMeta
-  },
-  { 
-    path: '/clock', 
-    component: CustomNTP,
-    meta: { requiresAuth: true } as RouteMeta
   },
   { 
     path: '/admin', 
@@ -44,7 +34,7 @@ const router = createRouter({
 })
 
 // Navigation guard for authentication
-router.beforeEach((to, from, next) => {
+router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
   const token = localStorage.getItem('jwt_token')
   
@@ -90,4 +80,4 @@ const app = createApp(App)
 app.use(router)
 
 // Mount app
-app.mount('#app') 
+app.mount('#app')

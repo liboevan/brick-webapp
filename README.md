@@ -1,4 +1,4 @@
-# Brick Hub
+# Brick Webapp
 
 [English README](./README.en.md)
 
@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com/)
 
-Brick Hub 是 Brick 生态的统一管理界面，提供 NTP 管理、安全监控、系统运维等一站式入口。
+Brick Webapp 是 Brick 生态的统一管理界面，提供 NTP 管理、安全监控、系统运维等一站式入口。
 
 ## ✨ 功能亮点
 
@@ -102,7 +102,7 @@ npm run dev
 ## 🏗️ 项目结构
 
 ```
-brick-hub/
+brick-webapp/
 ├── src/                    # Vue.js 应用源码
 │   ├── components/         # 组件
 │   │   ├── Dashboard.vue   # 主仪表盘
@@ -341,8 +341,8 @@ cp env.example .env
 ./scripts/deploy.sh deploy
 
 # 或手动部署
-docker build -t brick-hub .
-docker run -d --name brick-hub --restart unless-stopped -p 17002:80 brick-hub
+docker build -t brick-webapp .
+docker run -d --name brick-webapp --restart unless-stopped -p 17002:80 brick-hub
 ```
 
 ## 🌐 网络配置
@@ -362,10 +362,14 @@ docker run -d --name brick-hub --restart unless-stopped -p 17002:80 brick-hub
 | `VERSION` | `0.1.0-dev` | 应用版本 |
 | `BUILD_DATETIME` | 当前时间 | 构建时间戳 |
 | `NODE_ENV` | `development` | Node.js 环境 |
-| `IMAGE_NAME` | `el/brick-hub` | Docker 镜像名称 |
-| `CONTAINER_NAME` | `el-brick-hub` | Docker 容器名称 |
+| `IMAGE_NAME` | `brick-webapp` | Docker 镜像名称 |
+| `CONTAINER_NAME` | `brick-webpp` | Docker 容器名称 |
 
 ## 🐳 Docker 部署
+
+> **注意**：本项目 Docker 镜像和容器名称使用 `brick-webpp`，但项目展示名称仍为 **brick hub**，特此说明以避免混淆。
+
+
 
 ### 构建镜像
 
@@ -478,4 +482,4 @@ curl http://localhost:17002
 ---
 
 **版本**：0.1.0-dev  
-**最后更新**：2025 年 1 月 
+**最后更新**：2025 年 1 月

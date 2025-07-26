@@ -18,7 +18,7 @@ fi
 
 # Optional: Remove all images if requested
 if [ "$1" = "--image" ]; then
-    print_info "Removing all brick-hub images..."
+    print_info "Removing all brick-webapp images..."
     docker images --filter "reference=$IMAGE_NAME" --format "{{.Repository}}:{{.Tag}}" | while read image; do
         print_info "Removing image: $image"
         docker rmi "$image" 2>/dev/null || true
@@ -26,4 +26,4 @@ if [ "$1" = "--image" ]; then
     print_info "All images removed successfully!"
 fi
 
-print_info "Cleanup completed!" 
+print_info "Cleanup completed!"

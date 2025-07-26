@@ -14,18 +14,6 @@
       <div class="nav-section">
         <h3 v-if="!collapsed" class="nav-section-title">Services</h3>
         <ul class="nav-list">
-          <!-- NTP - Available to all authenticated users -->
-          <li v-if="isAuthenticated" class="nav-item">
-            <router-link 
-              to="/ntp" 
-              class="nav-link"
-              :class="{ active: $route.path === '/ntp' }"
-              :title="collapsed ? 'NTP Management' : ''"
-            >
-              <span class="nav-icon">🕐</span>
-              <span v-if="!collapsed" class="nav-label">NTP</span>
-            </router-link>
-          </li>
 
           <!-- Admin Management - Only for super-admin -->
           <li v-if="isSuperAdmin" class="nav-item">
@@ -353,4 +341,4 @@ export default {
 .nav-content::-webkit-scrollbar-thumb:hover {
   background: rgba(76, 175, 80, 0.5);
 }
-</style> 
+</style>
